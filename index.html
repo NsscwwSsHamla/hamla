@@ -4,6 +4,2213 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منظومة إدارة بونات منطقة شرم الشيخ</title>
+<meta name="description" content="منظومة إدارة بونات المياه - شركة مياه الشرب والصرف الصحي - قطاع جنوب سيناء - منطقة شرم الشيخ">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;direction:rtl;background:#f0f4f8;min-height:100vh;}
+:root{
+  --blue:#004a99;--blue2:#003f7f;--light-blue:#e6f1fb;
+  --white:#fff;--gray:#f5f7fa;--border:#dce8f5;
+  --text:#222;--muted:#666;--green:#0F6E56;--red:#c00;
+  --orange:#e67e22;--purple:#8e44ad;
+}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:linear-gradient(135deg,#003f7f,#005baa,#0073d1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s;}
+.sp-logo{width:180px;height:180px;border-radius:50%;border:4px solid rgba(255,255,255,0.3);
+  background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:24px;
+  animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.sp-logo img{width:168px;height:168px;border-radius:50%;object-fit:cover;}
+.sp-title{color:#fff;font-size:22px;font-weight:900;text-align:center;line-height:1.8;margin-bottom:8px;}
+.sp-sub{color:rgba(255,255,255,0.85);font-size:15px;font-weight:600;text-align:center;}
+.sp-bar{width:220px;height:5px;background:rgba(255,255,255,0.2);border-radius:3px;margin-top:28px;overflow:hidden;}
+.sp-bar-in{height:100%;width:0;background:#4fc3f7;border-radius:3px;animation:ld 2.8s ease-out forwards;}
+@keyframes ld{to{width:100%;}}
+.sp-pow{position:absolute;bottom:20px;right:24px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;direction:ltr;letter-spacing:.5px;}
+
+/* LOGIN */
+#loginPage{display:none;min-height:100vh;background:linear-gradient(135deg,#003f7f,#005baa);
+  align-items:center;justify-content:center;flex-direction:column;}
+.login-box{background:#fff;border-radius:18px;padding:40px 36px;width:380px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.login-logo{text-align:center;margin-bottom:16px;}
+.login-logo img{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--light-blue);}
+.login-title{font-size:17px;font-weight:700;color:var(--blue2);text-align:center;margin-bottom:6px;}
+.login-subtitle{font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-group label{font-size:14px;font-weight:600;color:#333;display:block;margin-bottom:5px;}
+.form-group input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;
+  font-family:'Cairo',sans-serif;font-size:14px;outline:none;transition:border .2s;}
+.form-group input:focus{border-color:var(--blue);}
+.remember{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;margin-bottom:4px;}
+.remember input{width:auto;}
+.login-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:13px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .2s;}
+.login-btn:hover{background:var(--blue2);}
+.login-forgot{text-align:center;margin-top:14px;font-size:13px;color:var(--blue);cursor:pointer;text-decoration:underline;}
+.login-err{background:#fee2e2;color:#c00;border-radius:8px;padding:9px 12px;font-size:13px;text-align:center;margin-top:10px;display:none;}
+.login-pow{color:rgba(255,255,255,0.55);font-size:12px;margin-top:18px;direction:ltr;font-weight:600;}
+
+/* TOPBAR */
+#appPage{display:none;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--blue);padding:0 20px;height:60px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-logo{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.35);}
+.tb-name{color:#fff;font-size:14px;font-weight:700;}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.tb-welcome{color:#cce4ff;font-size:13px;}
+.tb-user{color:#fff;font-size:14px;font-weight:700;}
+.tb-avatar{width:34px;height:34px;border-radius:50%;background:#4fc3f7;display:flex;align-items:center;
+  justify-content:center;color:#003f7f;font-size:13px;font-weight:700;}
+.tb-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 14px;
+  border-radius:7px;font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;}
+.tb-btn:hover{background:rgba(255,255,255,0.25);}
+.notif-wrap{position:relative;}
+.notif-ico{background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;
+  border-radius:50%;cursor:pointer;font-size:16px;}
+.notif-dot{position:absolute;top:3px;right:3px;width:9px;height:9px;background:#ff5252;border-radius:50%;display:none;}
+
+/* NOTIF BAR */
+.notif-bar{background:#fff8e1;border-bottom:2px solid #ffc107;padding:8px 24px;font-size:13px;
+  font-weight:600;color:#7a5800;display:none;align-items:center;justify-content:space-between;}
+.notif-bar button{background:none;border:none;cursor:pointer;color:#7a5800;font-size:16px;font-weight:700;}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;min-height:calc(100vh - 100px);}
+.sidebar{width:240px;background:#fff;border-left:1px solid var(--border);padding:14px 0;
+  display:flex;flex-direction:column;box-shadow:2px 0 8px rgba(0,0,0,0.04);overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;
+  font-size:13px;color:var(--text);border-right:3px solid transparent;transition:all .2s;}
+.nav-item:hover{background:var(--light-blue);color:var(--blue);}
+.nav-item.active{background:var(--light-blue);color:var(--blue);border-right-color:var(--blue);font-weight:700;}
+.nav-icon{font-size:16px;width:22px;text-align:center;}
+.nav-sep{height:1px;background:var(--border);margin:6px 12px;}
+.nav-section{font-size:11px;color:var(--muted);padding:8px 18px 4px;font-weight:700;text-transform:uppercase;}
+
+/* MAIN */
+.main{flex:1;padding:24px;overflow-y:auto;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;
+  padding-bottom:12px;border-bottom:2px solid var(--border);}
+.page-title{font-size:20px;font-weight:700;color:var(--blue2);}
+.help-btn{background:var(--light-blue);border:1.5px solid var(--border);color:var(--blue);
+  padding:6px 14px;border-radius:8px;font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;font-weight:600;}
+
+/* CARDS HOME */
+.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;max-width:700px;margin:30px auto;}
+.home-card{background:#fff;border-radius:18px;border:2px solid var(--border);padding:32px 22px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;transition:all .2s;}
+.home-card:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,74,153,0.12);}
+.hc-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.hc-label{font-size:16px;font-weight:700;color:var(--blue2);}
+.hc-desc{font-size:12px;color:var(--muted);text-align:center;}
+
+/* BUTTONS */
+.btn{padding:10px 20px;border-radius:9px;border:none;font-family:'Cairo',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:var(--blue2);}
+.btn-success{background:#0F6E56;color:#fff;}
+.btn-success:hover{background:#0a5a46;}
+.btn-danger{background:#c00;color:#fff;}
+.btn-danger:hover{background:#a00;}
+.btn-outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
+.btn-outline:hover{background:var(--light-blue);}
+.btn-warning{background:var(--orange);color:#fff;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-sm{padding:6px 14px;font-size:13px;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* FORM */
+.form-card{background:#fff;border-radius:14px;border:1.5px solid var(--border);padding:24px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-grid.full{grid-template-columns:1fr;}
+.fg{display:flex;flex-direction:column;gap:6px;}
+.fg.full{grid-column:1/-1;}
+.fg label{font-size:14px;font-weight:700;color:#333;}
+.fg input,.fg select,.fg textarea{border:1.5px solid var(--border);border-radius:9px;
+  padding:10px 14px;font-family:'Cairo',sans-serif;font-size:14px;outline:none;width:100%;}
+.fg input:focus,.fg select:focus{border-color:var(--blue);}
+.fg textarea{resize:vertical;min-height:80px;}
+.radio-group{display:flex;gap:12px;}
+.radio-card{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;
+  display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s;font-size:14px;}
+.radio-card.selected{border-color:var(--blue);background:var(--light-blue);color:var(--blue);font-weight:700;}
+.mode-tabs{display:flex;gap:10px;margin-bottom:14px;}
+.mode-tab{flex:1;padding:9px;border:1.5px solid var(--border);border-radius:9px;background:#fff;
+  font-family:'Cairo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:#555;transition:all .2s;}
+.mode-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.auto-result{background:var(--light-blue);border:1.5px solid #b5d4f4;border-radius:9px;
+  padding:11px 16px;font-size:13px;color:#0C447C;display:none;margin-top:10px;line-height:1.8;}
+.manual-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.manual-row input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;
+  font-family:'Cairo',sans-serif;font-size:13px;}
+.manual-row span{font-size:13px;color:#555;white-space:nowrap;}
+.add-row-btn{background:none;border:1.5px dashed var(--blue);color:var(--blue);border-radius:8px;
+  padding:7px 16px;font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;margin-top:4px;}
+.total-box{background:var(--blue2);color:#fff;border-radius:9px;padding:11px 18px;
+  font-size:15px;font-weight:700;text-align:center;margin-top:10px;}
+.action-bar{display:flex;gap:12px;margin-top:22px;padding-top:18px;border-top:1.5px solid var(--border);flex-wrap:wrap;}
+
+/* NOTE DELETE */
+.note-option{display:flex;align-items:center;gap:6px;}
+.note-del-btn{background:#fee2e2;border:1px solid #fca5a5;color:#c00;border-radius:50%;
+  width:22px;height:22px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-weight:700;transition:all .2s;flex-shrink:0;}
+.note-del-btn:hover{background:#fca5a5;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--blue);color:#fff;padding:12px 14px;text-align:right;font-weight:700;white-space:nowrap;}
+td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+tr:hover td{background:#f8fbff;}
+.badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block;}
+.badge-green{background:#d4edda;color:#155724;}
+.badge-blue{background:var(--light-blue);color:var(--blue2);}
+.badge-red{background:#fee2e2;color:#c00;}
+.badge-orange{background:#fff3cd;color:#856404;}
+.badge-purple{background:#f3e5f5;color:#6a1b9a;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;
+  display:none;align-items:center;justify-content:center;}
+.modal-box{background:#fff;border-radius:18px;padding:28px;width:90%;max-width:520px;direction:rtl;
+  max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:17px;font-weight:700;color:var(--blue2);margin-bottom:18px;
+  display:flex;align-items:center;gap:8px;border-bottom:1.5px solid var(--border);padding-bottom:12px;}
+.modal-close{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:10px 24px;
+  font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;width:100%;}
+.modal-close:hover{opacity:0.9;}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:500px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;background:#f8fbff;border-radius:12px;
+  border:1.5px solid var(--border);margin-bottom:14px;}
+.chat-msg{margin-bottom:14px;display:flex;flex-direction:column;}
+.chat-msg.me{align-items:flex-start;}
+.chat-msg.other{align-items:flex-end;}
+.chat-bubble{max-width:70%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.6;word-break:break-word;}
+.chat-msg.me .chat-bubble{background:var(--blue);color:#fff;border-radius:12px 12px 0 12px;}
+.chat-msg.other .chat-bubble{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:12px 12px 12px 0;}
+.chat-sender{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.chat-time{font-size:10px;color:var(--muted);margin-top:3px;}
+.chat-input-wrap{display:flex;gap:10px;position:relative;}
+.chat-input-wrap input{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;
+  font-family:'Cairo',sans-serif;font-size:14px;outline:none;}
+.chat-input-wrap input:focus{border-color:var(--blue);}
+.mention-tag{background:#e0f0ff;color:var(--blue);font-weight:700;border-radius:4px;padding:0 3px;}
+
+/* @MENTION DROPDOWN */
+.mention-dropdown{position:absolute;bottom:100%;right:0;background:#fff;border:1.5px solid var(--border);
+  border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);max-height:180px;overflow-y:auto;
+  width:220px;display:none;z-index:50;margin-bottom:6px;}
+.mention-dropdown.show{display:block;}
+.mention-item{padding:9px 14px;cursor:pointer;font-size:13px;transition:background .15s;display:flex;align-items:center;gap:8px;}
+.mention-item:hover,.mention-item.active{background:var(--light-blue);color:var(--blue);}
+.mention-avatar{width:26px;height:26px;border-radius:50%;background:var(--light-blue);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);flex-shrink:0;}
+
+/* PREVIEW BON - A4 OPTIMIZED */
+.preview-page{background:#fff;border:1px solid #aaa;margin-bottom:14px;padding:8px;}
+.bon-grid-print{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.bon-print{border:1.5px solid #222;padding:9px 11px;position:relative;min-height:135px;
+  display:flex;flex-direction:column;gap:3px;overflow:hidden;}
+.bon-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-25deg);
+  font-size:26px;font-weight:900;color:rgba(0,50,140,0.06);white-space:nowrap;pointer-events:none;}
+.bon-top{display:flex;align-items:center;gap:8px;border-bottom:2px solid #222;padding-bottom:5px;margin-bottom:4px;}
+.bon-logo-sm{width:52px;height:52px;flex-shrink:0;border-radius:50%;overflow:hidden;border:1.5px solid #004a99;}
+.bon-logo-sm img{width:100%;height:100%;object-fit:cover;}
+.bon-co{font-size:9.5px;font-weight:900;color:#003f7f;line-height:1.6;flex:1;}
+.bon-row-p{display:flex;gap:4px;font-size:10px;color:#111;line-height:1.9;}
+.bon-lbl{font-weight:700;white-space:nowrap;min-width:65px;}
+.bon-val{flex:1;}
+.sig-ln{display:inline-block;border-bottom:1px solid #444;min-width:75px;}
+.bon-note-p{font-size:8.5px;color:#111;border-top:1.5px dashed #666;margin-top:4px;padding-top:4px;font-weight:700;text-align:center;}
+.bon-code{font-size:7.5px;color:#444;text-align:center;font-family:monospace;letter-spacing:2px;margin-top:3px;direction:ltr;font-weight:700;}
+.bon-qr{position:absolute;left:4px;bottom:4px;}
+.bon-qr canvas{width:32px!important;height:32px!important;}
+.bon-separator{display:none;}
+
+/* ENTITIES PAGE */
+.entity-type-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600;}
+.entity-gov{background:#d4edda;color:#155724;}
+.entity-com{background:#fff3cd;color:#856404;}
+.entity-res{background:#e0cffc;color:#6a1b9a;}
+
+/* TABS */
+.tab-bar{display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--border);}
+.tab-btn{padding:10px 20px;border:none;background:none;font-family:'Cairo',sans-serif;
+  font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:all .2s;}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-btn:hover{color:var(--blue);}
+
+/* FOOTER */
+.footer{background:#fff;border-top:2px solid var(--border);padding:12px 24px;
+  text-align:left;font-size:13px;color:var(--blue2);font-weight:700;direction:ltr;letter-spacing:.5px;}
+
+/* REPORTS FILTERS */
+.filter-bar{background:#fff;border-radius:12px;border:1.5px solid var(--border);padding:18px;margin-bottom:18px;}
+.filter-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+.entities-check{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.entity-cb{display:flex;align-items:center;gap:6px;background:#f5f7fa;border:1px solid var(--border);
+  border-radius:7px;padding:6px 12px;cursor:pointer;font-size:13px;}
+.entity-cb input{accent-color:var(--blue);}
+
+/* USERS */
+.user-card{background:#fff;border-radius:12px;border:1.5px solid var(--border);padding:18px;
+  display:flex;align-items:center;gap:14px;margin-bottom:12px;transition:all .2s;}
+.user-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.06);}
+.user-avatar-lg{width:48px;height:48px;border-radius:50%;background:var(--light-blue);
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--blue);}
+.user-info{flex:1;}
+.user-name{font-size:15px;font-weight:700;color:var(--blue2);}
+.user-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.user-code{font-family:monospace;background:#f0f4f8;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;color:var(--blue);}
+.user-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* PERMISSIONS */
+.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.perm-item{display:flex;align-items:center;gap:8px;background:#f5f7fa;border:1px solid var(--border);
+  border-radius:7px;padding:8px 12px;font-size:13px;}
+.perm-item input{accent-color:var(--blue);}
+
+/* STATUS FLOW */
+.status-flow{display:flex;flex-direction:column;gap:4px;font-size:12px;}
+.status-step{display:flex;align-items:center;gap:6px;}
+.status-step .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-step.done .dot{background:var(--green);}
+.status-step.current .dot{background:var(--orange);animation:blink 1s infinite;}
+.status-step.pending .dot{background:#ccc;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* DELETED RECORDS */
+.deleted-banner{background:#fff3cd;border:1.5px solid #ffc107;border-radius:12px;padding:14px 18px;
+  margin-bottom:18px;font-size:13px;color:#856404;display:flex;align-items:center;gap:10px;}
+
+/* LOADING */
+.loading-spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--border);
+  border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.7);z-index:999;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.loading-overlay.show{display:flex;}
+
+/* PRINT STYLES - A4 */
+@media print{
+  .topbar,.sidebar,.notif-bar,.footer,.controls-bar,.action-bar,.filter-bar,
+  .page-header,.tab-bar,.btn,.help-btn,.loading-overlay{display:none!important;}
+  .main{padding:0!important;margin:0!important;}
+  .app-body{display:block!important;}
+  @page{size:A4;margin:5mm;}
+  .preview-page{border:none!important;margin:0!important;padding:2mm!important;page-break-after:always;break-after:page;}
+  .bon-grid-print{gap:0!important;height:280mm;}
+  .bon-print{border:1px solid #000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;height:25%;}
+  .page-label-pr{display:none!important;}
+  body{background:#fff!important;}
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .form-grid{grid-template-columns:1fr;}
+  .home-cards{grid-template-columns:1fr 1fr;}
+  .filter-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner" style="width:40px;height:40px;border-width:4px;"></div>
+  <div style="font-size:14px;color:var(--blue);font-weight:600;" id="loadingText">جاري التحميل...</div>
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-logo"><img src="assets/logo.jpg" alt="لوجو" onerror="this.parentElement.innerHTML='<div style=\'color:rgba(255,255,255,0.5);font-size:12px;\'>مياه شرم الشيخ</div>'" id="splashLogo"></div>
+  <div class="sp-title">منظومة إدارة بونات<br>شركة مياه الشرب والصرف الصحي<br>قطاع جنوب سيناء - منطقة شرم الشيخ</div>
+  <div class="sp-sub">منظومة إدارة بونات منطقة شرم الشيخ</div>
+  <div class="sp-bar"><div class="sp-bar-in"></div></div>
+  <div class="sp-pow">Powered By : Eng.Ahmed Ezz Oshalla</div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage" style="display:none;min-height:100vh;background:linear-gradient(135deg,#003f7f,#005baa);align-items:center;justify-content:center;flex-direction:column;">
+  <div class="login-box">
+    <div class="login-logo"><img src="assets/logo.jpg" alt="لوجو" id="loginLogo" onerror="this.style.display='none'"></div>
+    <div class="login-title">تسجيل الدخول</div>
+    <div class="login-subtitle">منظومة إدارة بونات منطقة شرم الشيخ</div>
+    <div class="form-group"><label>اسم المستخدم</label><input type="text" id="lu" placeholder="username"></div>
+    <div class="form-group"><label>كلمة المرور</label><input type="password" id="lp" placeholder="password"></div>
+    <div class="remember"><input type="checkbox" id="rem"> <label for="rem">تذكرني</label></div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">دخول</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-forgot" onclick="showForgot()">نسيت كلمة المرور؟</div>
+  </div>
+  <div class="login-pow">Powered By : Eng.Ahmed Ezz Oshalla</div>
+</div>
+
+<!-- FORGOT -->
+<div id="forgotPage" style="display:none;min-height:100vh;background:linear-gradient(135deg,#003f7f,#005baa);align-items:center;justify-content:center;flex-direction:column;">
+  <div class="login-box">
+    <div class="login-title">استعادة كلمة المرور</div>
+    <div class="login-subtitle">أدخل رقم موبايلك وإيميلك</div>
+    <div class="form-group"><label>رقم الموبايل</label><input type="text" id="fp" placeholder="01xxxxxxxxx"></div>
+    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="fe" placeholder="example@gmail.com"></div>
+    <button class="login-btn" onclick="doForgot()">إرسال كلمة مرور جديدة</button>
+    <div class="login-err" id="forgotErr"></div>
+    <div class="login-forgot" onclick="showLogin()">← رجوع لتسجيل الدخول</div>
+  </div>
+  <div class="login-pow">Powered By : Eng.Ahmed Ezz Oshalla</div>
+</div>
+
+<!-- CHANGE PASSWORD (First Login) -->
+<div id="changePassPage" style="display:none;min-height:100vh;background:linear-gradient(135deg,#003f7f,#005baa);align-items:center;justify-content:center;flex-direction:column;">
+  <div class="login-box">
+    <div class="login-title">🔐 تغيير كلمة المرور</div>
+    <div class="login-subtitle">كلمة المرور الحالية مؤقتة - يرجى تغييرها</div>
+    <div class="form-group"><label>كلمة المرور الجديدة</label><input type="password" id="cp_new" placeholder="كلمة المرور الجديدة"></div>
+    <div class="form-group"><label>تأكيد كلمة المرور</label><input type="password" id="cp_confirm" placeholder="أعد كتابة كلمة المرور"></div>
+    <button class="login-btn" onclick="doChangePass()">تغيير كلمة المرور</button>
+    <div class="login-err" id="changePassErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appPage" style="display:none;flex-direction:column;min-height:100vh;">
+  <div class="topbar">
+    <div class="tb-right">
+      <img class="tb-logo" src="assets/logo.jpg" alt="لوجو" id="topbarLogo" onerror="this.style.display='none'">
+      <span class="tb-name">منظومة بونات شرم الشيخ</span>
+    </div>
+    <div class="tb-left">
+      <span class="tb-welcome">مرحباً،</span>
+      <span class="tb-user" id="tbName"></span>
+      <div class="notif-wrap">
+        <button class="notif-ico" onclick="toggleNotif()">🔔</button>
+        <span class="notif-dot" id="notifDot"></span>
+      </div>
+      <button class="tb-btn" onclick="doLogout()">خروج</button>
+      <div class="tb-avatar" id="tbAvatar"></div>
+    </div>
+  </div>
+
+  <div class="notif-bar" id="notifBar">
+    <span id="notifTxt"></span>
+    <button onclick="closeNotif()">✕</button>
+  </div>
+
+  <div class="app-body">
+    <div class="sidebar" id="sidebar">
+      <div class="nav-item active" onclick="goTo('home')" id="nav-home"><span class="nav-icon">🏠</span>الرئيسية</div>
+      <div class="nav-sep"></div>
+      <div class="nav-section">البونات</div>
+      <div class="nav-item" onclick="goTo('bons')" id="nav-bons"><span class="nav-icon">📋</span>إنشاء بون</div>
+      <div class="nav-item" onclick="goTo('preview')" id="nav-preview"><span class="nav-icon">👁️</span>معاينة</div>
+      <div class="nav-item" onclick="goTo('printsaved')" id="nav-printsaved"><span class="nav-icon">🖨️</span>طباعة بونات محفوظة</div>
+      <div class="nav-sep"></div>
+      <div class="nav-section">الإدارة</div>
+      <div class="nav-item" onclick="goTo('entities')" id="nav-entities"><span class="nav-icon">🏢</span>الجهات</div>
+      <div class="nav-item" onclick="goTo('reports')" id="nav-reports"><span class="nav-icon">📊</span>التقارير</div>
+      <div class="nav-item" onclick="goTo('requests')" id="nav-requests"><span class="nav-icon">📨</span>طلبات الكمية</div>
+      <div class="nav-item" onclick="goTo('chat')" id="nav-chat"><span class="nav-icon">💬</span>المحادثة</div>
+      <div class="nav-sep"></div>
+      <div class="nav-section">المستخدمين</div>
+      <div class="nav-item" onclick="goTo('users')" id="nav-users"><span class="nav-icon">👥</span>المستخدمين</div>
+      <div class="nav-item" onclick="goTo('adduser')" id="nav-adduser"><span class="nav-icon">➕</span>إضافة مستخدم</div>
+      <div class="nav-sep"></div>
+      <div class="nav-section">السجلات</div>
+      <div class="nav-item" onclick="goTo('logs')" id="nav-logs"><span class="nav-icon">📜</span>سجلات العمليات</div>
+      <div class="nav-item" onclick="goTo('security')" id="nav-security"><span class="nav-icon">🔒</span>سجلات الأمان</div>
+      <div class="nav-item" onclick="goTo('deleted')" id="nav-deleted"><span class="nav-icon">🗑️</span>سجل المحذوفات</div>
+    </div>
+
+    <div class="main" id="mainArea">
+
+      <!-- HOME -->
+      <div id="sec-home">
+        <div class="page-header">
+          <div class="page-title">الصفحة الرئيسية</div>
+          <button class="help-btn" onclick="showHelp('home')">❓ مساعدة</button>
+        </div>
+        <div class="home-cards">
+          <div class="home-card" onclick="goTo('bons')">
+            <div class="hc-icon" style="background:#e6f1fb;">📋</div>
+            <div class="hc-label">البونات</div>
+            <div class="hc-desc">إنشاء وطباعة بونات المياه</div>
+          </div>
+          <div class="home-card" onclick="goTo('entities')">
+            <div class="hc-icon" style="background:#e8f5e9;">🏢</div>
+            <div class="hc-label">الجهات</div>
+            <div class="hc-desc">إدارة جهات التوزيع</div>
+          </div>
+          <div class="home-card" onclick="goTo('reports')">
+            <div class="hc-icon" style="background:#e1f5ee;">📊</div>
+            <div class="hc-label">التقارير</div>
+            <div class="hc-desc">عرض وتصدير التقارير</div>
+          </div>
+          <div class="home-card" onclick="goTo('requests')">
+            <div class="hc-icon" style="background:#fff3e0;">📨</div>
+            <div class="hc-label">طلبات الكمية</div>
+            <div class="hc-desc">طلب والموافقة على الكميات</div>
+          </div>
+          <div class="home-card" onclick="goTo('chat')">
+            <div class="hc-icon" style="background:#f3e5f5;">💬</div>
+            <div class="hc-label">المحادثة</div>
+            <div class="hc-desc">التواصل مع المستخدمين</div>
+          </div>
+          <div class="home-card" onclick="goTo('printsaved')" id="home-print">
+            <div class="hc-icon" style="background:#fce4ec;">🖨️</div>
+            <div class="hc-label">الطباعة</div>
+            <div class="hc-desc">طباعة بونات محفوظة</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BONS -->
+      <div id="sec-bons" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">إنشاء بون جديد</div>
+          <button class="help-btn" onclick="showHelp('bons')">❓ مساعدة</button>
+        </div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="fg">
+              <label>نوع المياه</label>
+              <div class="radio-group">
+                <div class="radio-card selected" id="rt-tah" onclick="setWaterType('تحلية')">💧 مياه تحلية</div>
+                <div class="radio-card" id="rt-mua" onclick="setWaterType('معالجة')">🌊 مياه معالجة</div>
+              </div>
+            </div>
+            <div class="fg">
+              <label>مسلسل البون</label>
+              <input type="text" id="bonSerial" readonly style="background:#f5f7fa;font-size:22px;font-weight:900;color:var(--blue2);text-align:center;">
+            </div>
+            <div class="fg">
+              <label>التاريخ</label>
+              <input type="text" id="bonDate" readonly style="background:#f5f7fa;">
+            </div>
+            <div class="fg full">
+              <label>الجهة</label>
+              <div style="display:flex;gap:8px;">
+                <select id="bonEntity" style="flex:1;" onchange="checkEntityOther()">
+                  <option value="">-- اختر الجهة --</option>
+                </select>
+                <select id="bonTransport" style="width:140px;">
+                  <option value="بدون نقل">بدون نقل</option>
+                  <option value="شامل النقل">شامل النقل</option>
+                </select>
+              </div>
+              <input type="text" id="bonEntityOther" placeholder="اكتب اسم الجهة الجديدة..." style="display:none;margin-top:8px;">
+            </div>
+            <div class="fg full">
+              <label>الكمية</label>
+              <div class="mode-tabs">
+                <button class="mode-tab active" id="mt-auto" onclick="setQtyMode('auto')">أوتوماتيك</button>
+                <button class="mode-tab" id="mt-manual" onclick="setQtyMode('manual')">يدوي</button>
+              </div>
+              <div id="auto-sec">
+                <input type="number" id="totalQty" placeholder="أدخل الكمية الإجمالية بالمتر المكعب" oninput="calcAuto()">
+                <div class="auto-result" id="autoResult"></div>
+              </div>
+              <div id="manual-sec" style="display:none;">
+                <div id="manualRows">
+                  <div class="manual-row">
+                    <span>حجم البون</span>
+                    <input type="number" placeholder="م³" oninput="calcManual()">
+                    <span>×</span>
+                    <input type="number" placeholder="عدد" oninput="calcManual()">
+                    <span>بون</span>
+                  </div>
+                </div>
+                <button class="add-row-btn" onclick="addManualRow()">+ إضافة سطر</button>
+                <div class="total-box" id="manualTotal">الإجمالي: 0 م³</div>
+              </div>
+            </div>
+            <div class="fg full">
+              <label>الملاحظات</label>
+              <div id="notesContainer">
+                <select id="bonNotes" onchange="checkNotesOther()">
+                  <option value="">-- اختر ملاحظة --</option>
+                </select>
+              </div>
+              <input type="text" id="bonNotesOther" placeholder="اكتب الملاحظة..." style="display:none;margin-top:8px;">
+            </div>
+            <div class="fg full">
+              <label>معلومات البون الإضافية</label>
+              <div class="form-grid">
+                <div class="fg">
+                  <label style="font-size:12px;color:var(--muted);">مين طلب؟</label>
+                  <select id="bonRequester"><option value="">-- اختر --</option></select>
+                </div>
+                <div class="fg">
+                  <label style="font-size:12px;color:var(--muted);">مين وافق؟</label>
+                  <select id="bonApprover"><option value="">-- اختر --</option></select>
+                </div>
+                <div class="fg">
+                  <label style="font-size:12px;color:var(--muted);">مين طبع؟</label>
+                  <input type="text" id="bonPrinter" readonly style="background:#f5f7fa;">
+                </div>
+                <div class="fg">
+                  <label style="font-size:12px;color:var(--muted);">مين سلّم للعميل؟</label>
+                  <select id="bonDelivery" onchange="checkDeliveryOther()">
+                    <option value="">-- اختر --</option>
+                  </select>
+                  <input type="text" id="bonDeliveryOther" placeholder="اسم المسلّم..." style="display:none;margin-top:6px;">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-outline" onclick="resetBonForm()">مسح</button>
+            <button class="btn btn-success" onclick="saveBon()">💾 حفظ</button>
+            <button class="btn btn-primary" onclick="goPreview()">👁️ معاينة</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div id="sec-preview" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">معاينة البون</div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-outline btn-sm" onclick="goTo('bons')">← تعديل</button>
+            <button class="btn btn-success btn-sm" onclick="saveBon()">💾 حفظ</button>
+            <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ طباعة</button>
+          </div>
+        </div>
+        <div id="previewContent"></div>
+      </div>
+
+      <!-- PRINT SAVED BONS -->
+      <div id="sec-printsaved" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">طباعة بونات محفوظة</div>
+          <button class="help-btn" onclick="showHelp('printsaved')">❓ مساعدة</button>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-row">
+            <div class="fg"><label>مسلسل من</label><input type="text" id="psFrom" placeholder="مثال: T-1"></div>
+            <div class="fg"><label>مسلسل إلى</label><input type="text" id="psTo" placeholder="مثال: T-50"></div>
+            <div class="fg"><label>الجهة</label>
+              <select id="psEntity"><option value="all">الكل</option></select>
+            </div>
+            <div class="fg"><label>من تاريخ</label><input type="date" id="psDateFrom"></div>
+            <div class="fg"><label>إلى تاريخ</label><input type="date" id="psDateTo"></div>
+            <button class="btn btn-primary btn-sm" onclick="loadSavedBons()" style="margin-top:22px;">🔍 بحث</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;">
+          <button class="btn btn-outline btn-sm" onclick="toggleSelectAll()">☑️ تحديد/إلغاء الكل</button>
+          <button class="btn btn-primary btn-sm" onclick="printSelectedBons()">🖨️ طباعة المحدد</button>
+          <span id="selectedCount" style="font-size:13px;color:var(--muted);"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox" id="selectAllCb" onchange="toggleSelectAll()"></th>
+              <th>مسلسل</th><th>التاريخ</th><th>النوع</th><th>الكمية</th>
+              <th>الجهة</th><th>النقل</th><th>الحالة</th>
+            </tr></thead>
+            <tbody id="savedBonsTbody"></tbody>
+          </table>
+        </div>
+        <div id="savedBonsPreview" style="margin-top:18px;"></div>
+      </div>
+
+      <!-- ENTITIES -->
+      <div id="sec-entities" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">إدارة الجهات</div>
+          <button class="help-btn" onclick="showHelp('entities')">❓ مساعدة</button>
+        </div>
+        <div class="form-card" style="margin-bottom:18px;" id="addEntityCard">
+          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="fg" style="flex:1;min-width:200px;">
+              <label>اسم الجهة</label>
+              <input type="text" id="newEntityName" placeholder="أدخل اسم الجهة الجديدة">
+            </div>
+            <div class="fg" style="width:180px;">
+              <label>النظام</label>
+              <select id="newEntityType">
+                <option value="حكومي">حكومي</option>
+                <option value="تجاري">تجاري</option>
+                <option value="منزلي">منزلي</option>
+              </select>
+            </div>
+            <button class="btn btn-success btn-sm" onclick="addEntity()">➕ إضافة جهة</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>اسم الجهة</th><th>النظام</th><th>أضيفت بواسطة</th><th>التاريخ</th><th>إجراءات</th>
+            </tr></thead>
+            <tbody id="entitiesTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="sec-reports" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">التقارير</div>
+          <button class="help-btn" onclick="showHelp('reports')">❓ مساعدة</button>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-row">
+            <div class="fg"><label>من تاريخ</label><input type="date" id="repFrom"></div>
+            <div class="fg"><label>إلى تاريخ</label><input type="date" id="repTo"></div>
+            <div class="fg"><label>نوع المياه</label>
+              <select id="repType">
+                <option value="all">الكل</option>
+                <option value="تحلية">مياه تحلية (T)</option>
+                <option value="معالجة">مياه معالجة (M)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="loadReports()" style="margin-top:22px;">بحث</button>
+          </div>
+          <div style="margin-top:12px;">
+            <label style="font-size:14px;font-weight:700;color:#333;">الجهات:</label>
+            <div class="entities-check" id="entitiesCheck"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;">
+          <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 تصدير Excel</button>
+          <button class="btn btn-danger btn-sm" onclick="exportPDF()">📄 تصدير PDF</button>
+          <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ طباعة</button>
+          <div id="reportAutoRefresh" style="font-size:11px;color:var(--muted);margin-right:auto;">
+            <label style="cursor:pointer;"><input type="checkbox" id="autoRefreshCb" onchange="toggleAutoRefresh()" checked> تحديث تلقائي</label>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="reportsTable">
+            <thead><tr>
+              <th>مسلسل</th><th>التاريخ</th><th>النوع</th><th>الكمية</th>
+              <th>الجهة</th><th>النقل</th><th>الحالة</th><th>إجراءات</th>
+            </tr></thead>
+            <tbody id="reportsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REQUESTS -->
+      <div id="sec-requests" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">طلبات الكمية</div>
+          <button class="help-btn" onclick="showHelp('requests')">❓ مساعدة</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:18px;" id="reqBtns">
+          <button class="btn btn-primary" onclick="showReqModal()">+ طلب كمية جديد</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>الطالب</th><th>الجهة</th><th>الكمية</th><th>التصديق</th>
+              <th>الحالة</th><th>التاريخ</th><th>ملف</th><th>إجراء</th>
+            </tr></thead>
+            <tbody id="reqTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="sec-chat" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">المحادثة</div>
+          <button class="help-btn" onclick="showHelp('chat')">❓ مساعدة</button>
+        </div>
+        <div class="chat-wrap">
+          <div class="chat-msgs" id="chatMsgs"></div>
+          <div class="chat-input-wrap">
+            <div class="mention-dropdown" id="mentionDropdown"></div>
+            <input type="text" id="chatInput" placeholder="اكتب رسالة... (@ لذكر شخص)" onkeydown="handleChatKey(event)" oninput="handleMention(event)">
+            <button class="btn btn-primary" onclick="sendChat()">إرسال</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div id="sec-users" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">المستخدمين</div>
+          <div style="display:flex;gap:8px;">
+            <button class="help-btn" onclick="showHelp('users')">❓ مساعدة</button>
+            <button class="btn btn-warning btn-sm" id="banAllBtn" onclick="banAll()" style="display:none;">⛔ حظر الجميع</button>
+            <button class="btn btn-success btn-sm" id="unbanAllBtn" onclick="unbanAll()" style="display:none;">✅ تفعيل الجميع</button>
+          </div>
+        </div>
+        <div id="usersList"></div>
+      </div>
+
+      <!-- ADD USER -->
+      <div id="sec-adduser" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">إضافة مستخدم جديد</div>
+          <button class="help-btn" onclick="showHelp('adduser')">❓ مساعدة</button>
+        </div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="fg"><label>اسم المستخدم</label><input type="text" id="nu_user" placeholder="username"></div>
+            <div class="fg"><label>كلمة المرور (مؤقتة)</label><input type="password" id="nu_pass" placeholder="كلمة المرور المؤقتة"></div>
+            <div class="fg"><label>الاسم الفعلي</label><input type="text" id="nu_name" placeholder="الاسم بالكامل"></div>
+            <div class="fg"><label>كود المستخدم</label><input type="text" id="nu_code" placeholder="مثال: 001" maxlength="3" style="font-family:monospace;font-size:18px;text-align:center;letter-spacing:4px;"></div>
+            <div class="fg"><label>رقم الموبايل</label><input type="text" id="nu_phone" placeholder="01xxxxxxxxx"></div>
+            <div class="fg full"><label>البريد الإلكتروني</label><input type="email" id="nu_email" placeholder="example@gmail.com"></div>
+            <div class="fg full">
+              <label>نوع الحساب</label>
+              <select id="nu_role" onchange="updatePermsUI()">
+                <option value="viewer">Viewer - مشاهدة فقط</option>
+                <option value="user">User - مستخدم عادي</option>
+                <option value="admin">Admin - مدير</option>
+              </select>
+            </div>
+            <div class="fg full">
+              <label>الصلاحيات</label>
+              <div class="perm-grid" id="permsGrid">
+                <div class="perm-item"><input type="checkbox" id="p_add_bons"><label for="p_add_bons">إضافة بونات</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_print_bons"><label for="p_print_bons">طباعة بونات</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_view_reports"><label for="p_view_reports">مشاهدة تقارير</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_print_reports"><label for="p_print_reports">طباعة تقارير</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_add_entity"><label for="p_add_entity">إضافة جهات</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_del_entity"><label for="p_del_entity">حذف من القوائم</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_request_qty"><label for="p_request_qty">طلب كمية</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_approve_qty"><label for="p_approve_qty">الموافقة على الكمية</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_manage_users"><label for="p_manage_users">إدارة المستخدمين</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_delete"><label for="p_delete">حذف (بونات/تقارير/سجلات)</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_view_activity_logs"><label for="p_view_activity_logs">سجلات العمليات</label></div>
+                <div class="perm-item"><input type="checkbox" id="p_view_security_logs"><label for="p_view_security_logs">سجلات الأمان</label></div>
+              </div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-primary" onclick="addUser()">➕ إضافة المستخدم</button>
+          </div>
+          <div class="login-err" id="addUserErr" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY LOGS -->
+      <div id="sec-logs" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">📜 سجلات العمليات</div>
+          <div style="display:flex;gap:8px;">
+            <button class="help-btn" onclick="showHelp('logs')">❓ مساعدة</button>
+            <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ طباعة</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>المستخدم</th><th>العملية</th><th>التفاصيل</th><th>التوقيت</th></tr></thead>
+            <tbody id="logsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SECURITY LOGS -->
+      <div id="sec-security" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">🔒 سجلات الأمان</div>
+          <div style="display:flex;gap:8px;">
+            <button class="help-btn" onclick="showHelp('security')">❓ مساعدة</button>
+            <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ طباعة</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>المستخدم</th><th>العملية</th><th>التفاصيل</th><th>التوقيت</th></tr></thead>
+            <tbody id="secLogsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DELETED RECORDS (SuperAdmin) -->
+      <div id="sec-deleted" style="display:none;">
+        <div class="page-header">
+          <div class="page-title">🗑️ سجل المحذوفات</div>
+          <div style="display:flex;gap:8px;">
+            <button class="help-btn" onclick="showHelp('deleted')">❓ مساعدة</button>
+            <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ طباعة</button>
+          </div>
+        </div>
+        <div class="deleted-banner">
+          ⚠️ هذه الصفحة تعرض جميع العناصر المحذوفة من المنظومة. متاحة فقط للـ SuperAdmin.
+        </div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="filterDeleted('all',this)">الكل</button>
+          <button class="tab-btn" onclick="filterDeleted('bon',this)">بونات</button>
+          <button class="tab-btn" onclick="filterDeleted('entity',this)">جهات</button>
+          <button class="tab-btn" onclick="filterDeleted('user',this)">مستخدمين</button>
+          <button class="tab-btn" onclick="filterDeleted('note',this)">ملاحظات</button>
+          <button class="tab-btn" onclick="filterDeleted('chat',this)">محادثات</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>النوع</th><th>البيانات</th><th>حذف بواسطة</th><th>تاريخ الحذف</th></tr></thead>
+            <tbody id="deletedTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="footer">Powered By : Eng.Ahmed Ezz Oshalla</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-ov" id="helpModal" onclick="closeModal('helpModal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">❓ <span id="helpTitle"></span></div>
+    <div class="modal-body" id="helpBody" style="font-size:14px;line-height:1.9;color:#333;"></div>
+    <button class="modal-close" onclick="closeModal('helpModal')">حسناً</button>
+  </div>
+</div>
+
+<div class="modal-ov" id="reqModal" onclick="closeModal('reqModal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">📨 طلب كمية جديد</div>
+    <div class="fg" style="margin-bottom:12px;"><label>الجهة</label><select id="req_entity" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:9px;font-family:'Cairo',sans-serif;font-size:14px;"></select></div>
+    <div class="fg" style="margin-bottom:12px;"><label>الكمية (م³)</label><input type="number" id="req_qty" placeholder="أدخل الكمية" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:9px;font-family:'Cairo',sans-serif;font-size:14px;"></div>
+    <div class="fg" style="margin-bottom:12px;"><label>رفع ملف (صورة أو PDF)</label><input type="file" id="req_file" accept="image/*,.pdf" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:9px;"></div>
+    <button class="modal-close" onclick="submitRequest()" style="background:var(--green);">إرسال الطلب</button>
+    <button class="modal-close" onclick="closeModal('reqModal')" style="background:#888;margin-top:8px;">إلغاء</button>
+  </div>
+</div>
+
+<div class="modal-ov" id="editUserModal" onclick="closeModal('editUserModal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">✏️ تعديل مستخدم</div>
+    <input type="hidden" id="eu_username">
+    <div class="fg" style="margin-bottom:12px;"><label>الاسم الفعلي</label><input type="text" id="eu_name"></div>
+    <div class="fg" style="margin-bottom:12px;"><label>الكود</label><input type="text" id="eu_code" maxlength="3" style="font-family:monospace;font-size:18px;text-align:center;letter-spacing:4px;"></div>
+    <div class="fg" style="margin-bottom:12px;"><label>رقم الموبايل</label><input type="text" id="eu_phone"></div>
+    <div class="fg" style="margin-bottom:12px;"><label>البريد الإلكتروني</label><input type="email" id="eu_email"></div>
+    <div class="fg" style="margin-bottom:12px;"><label>نوع الحساب</label>
+      <select id="eu_role">
+        <option value="viewer">Viewer</option>
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <button class="modal-close" onclick="saveEditUser()" style="background:var(--green);">💾 حفظ التعديلات</button>
+    <button class="modal-close" onclick="closeModal('editUserModal')" style="background:#888;margin-top:8px;">إلغاء</button>
+  </div>
+</div>
+
+<div class="modal-ov" id="editEntityModal" onclick="closeModal('editEntityModal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">✏️ تعديل اسم الجهة</div>
+    <input type="hidden" id="ee_old_name">
+    <div class="fg" style="margin-bottom:12px;"><label>الاسم الجديد</label><input type="text" id="ee_new_name"></div>
+    <button class="modal-close" onclick="saveEditEntity()" style="background:var(--green);">💾 حفظ</button>
+    <button class="modal-close" onclick="closeModal('editEntityModal')" style="background:#888;margin-top:8px;">إلغاء</button>
+  </div>
+</div>
+
+<script>
+// ==================== CONFIGURATION ====================
+const API = 'https://script.google.com/macros/s/AKfycbyjWw6QQQiJ6x-luPYPToJtGnpgHwrZop98JkcK11W0ZUQglwd2A3_Qs6-SPZZEX_dI/exec';
+const SUPERADMIN_USER = 'NazGul.Ezz.Admin';
+const SUPERADMIN_PASS = 'N@zGul+Ezz+Bon@t+31415926542026';
+
+// Logo fix - add timestamp to force reload
+function fixLogos(){
+  const ts = new Date().getTime();
+  document.querySelectorAll('img[src="assets/logo.jpg"]').forEach(img=>{
+    img.src = 'assets/logo.jpg?v='+ts;
+    img.onerror = function(){ this.style.display='none'; };
+  });
+}
+
+let CU = null; // Current User
+let bonData = null;
+let waterType = 'تحلية';
+let qtyMode = 'auto';
+let entities = [];
+let users = [];
+let allBons = [];
+let reportInterval = null;
+let chatInterval = null;
+let deletedFilter = 'all';
+
+// Default notes
+let defaultNotes = [
+  'لا يعتد بالبون إلا بختم المنطقة - حصة يناير 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة فبراير 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة مارس 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة أبريل 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة مايو 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة يونيو 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة يوليو 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة أغسطس 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة سبتمبر 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة أكتوبر 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة نوفمبر 2026',
+  'لا يعتد بالبون إلا بختم المنطقة - حصة ديسمبر 2026'
+];
+
+// ==================== HELP ====================
+const HELP = {
+  home:{title:'الرئيسية',body:'الصفحة الرئيسية تتيح الوصول السريع لجميع أقسام المنظومة. اختر القسم المطلوب من الكروت أو من القائمة الجانبية.'},
+  bons:{title:'إنشاء بون',body:'من هنا تنشئ بونات مياه جديدة. اختر نوع المياه (تحلية أو معالجة) ثم أدخل الكمية واختر الجهة. اضغط حفظ أولاً ثم معاينة.'},
+  preview:{title:'معاينة',body:'تعرض معاينة البونات. يمكنك مراجعة البيانات ثم الضغط على تعديل أو حفظ أو طباعة.'},
+  printsaved:{title:'طباعة بونات محفوظة',body:'ابحث عن بونات محفوظة سابقاً بالمسلسل أو الجهة أو التاريخ. حدد البونات المطلوبة واضغط طباعة.'},
+  entities:{title:'الجهات',body:'إدارة جهات التوزيع. يمكن إضافة جهة جديدة مع تحديد نظامها (حكومي/تجاري/منزلي). الحذف متاح للـ Admin والـ SuperAdmin فقط. التعديل متاح للـ SuperAdmin فقط.'},
+  reports:{title:'التقارير',body:'عرض تقارير البونات وفلترتها بالتاريخ والجهة ونوع المياه. يمكن التصدير لـ Excel أو PDF. التحديث التلقائي كل 5 ثواني.'},
+  requests:{title:'طلبات الكمية',body:'تقديم طلب كمية مياه أو الموافقة. بعد الموافقة يظهر زرار إنشاء بون، ثم طباعة.'},
+  chat:{title:'المحادثة',body:'محادثة جماعية. اكتب @ لذكر شخص معين. يتم التحديث تلقائياً كل 3 ثواني.'},
+  users:{title:'المستخدمين',body:'قائمة بجميع مستخدمي المنظومة. Admin/SuperAdmin يمكنهم تعديل وحظر المستخدمين.'},
+  adduser:{title:'إضافة مستخدم',body:'إضافة مستخدم جديد مع تحديد الكود (3 أرقام) ونوع الحساب والصلاحيات. كلمة المرور تكون مؤقتة ويغيرها المستخدم عند أول دخول.'},
+  logs:{title:'سجلات العمليات',body:'سجل كامل بجميع العمليات: إنشاء بون، حذف، تعديل جهة، إلخ.'},
+  security:{title:'سجلات الأمان',body:'سجل الدخول والخروج وتغيير كلمات المرور والصلاحيات. متاح للـ Admin والـ SuperAdmin فقط.'},
+  deleted:{title:'سجل المحذوفات',body:'جميع العناصر المحذوفة من المنظومة (بونات، جهات، مستخدمين، ملاحظات، محادثات). متاح للـ SuperAdmin فقط.'}
+};
+
+// ==================== SPLASH & AUTH ====================
+window.onload = function(){
+  fixLogos();
+  loadSaved();
+  setTimeout(()=>{
+    document.getElementById('splash').style.opacity='0';
+    setTimeout(()=>{document.getElementById('splash').style.display='none'; if(!CU) showLogin();},600);
+  },3000);
+};
+
+function loadSaved(){
+  const saved = localStorage.getItem('bon_user');
+  if(saved){ CU = JSON.parse(saved); startApp(); }
+}
+
+function showLogin(){
+  hide('forgotPage'); hide('appPage'); hide('changePassPage');
+  const lp = document.getElementById('loginPage');
+  lp.style.display='flex';
+  const rem = localStorage.getItem('bon_remember');
+  if(rem){ const r=JSON.parse(rem); document.getElementById('lu').value=r.u; document.getElementById('lp').value=r.p; document.getElementById('rem').checked=true; }
+}
+
+function showForgot(){ hide('loginPage'); document.getElementById('forgotPage').style.display='flex'; }
+
+async function doLogin(){
+  const u=val('lu'), p=val('lp');
+  if(!u||!p) return showErr('loginErr','أدخل اسم المستخدم وكلمة المرور');
+  showErr('loginErr','جاري التحقق...','#e6f1fb','var(--blue)');
+
+  // Superadmin local check (bypass API)
+  if(u===SUPERADMIN_USER && p===SUPERADMIN_PASS){
+    CU = {username:SUPERADMIN_USER,fullname:'NazGul Ezz Admin',role:'superadmin',permissions:'all',status:'active',code:'000'};
+    if(document.getElementById('rem').checked) localStorage.setItem('bon_remember',JSON.stringify({u,p}));
+    else localStorage.removeItem('bon_remember');
+    localStorage.setItem('bon_user', JSON.stringify(CU));
+    startApp();
+    return;
+  }
+
+  try{
+    const r = await api({action:'login',username:u,password:p});
+    if(r.success){
+      CU = r.user;
+      if(document.getElementById('rem').checked) localStorage.setItem('bon_remember',JSON.stringify({u,p}));
+      else localStorage.removeItem('bon_remember');
+      if(CU.temp_password){
+        hide('loginPage');
+        document.getElementById('changePassPage').style.display='flex';
+        return;
+      }
+      localStorage.setItem('bon_user', JSON.stringify(CU));
+      startApp();
+    } else {
+      showErr('loginErr', r.msg==='banned'?'هذا الحساب محظور':'اسم المستخدم أو كلمة المرور خاطئة');
+    }
+  } catch(e){ showErr('loginErr','خطأ في الاتصال'); }
+}
+
+async function doChangePass(){
+  const np=val('cp_new'), nc=val('cp_confirm');
+  if(!np || np.length<6) return showErr('changePassErr','كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  if(np!==nc) return showErr('changePassErr','كلمة المرور غير متطابقة');
+  try{
+    const r = await api({action:'updateUser',username:CU.username,password:np,temp_password:false,by:CU.username});
+    if(r.success){
+      CU.temp_password = false;
+      localStorage.setItem('bon_user', JSON.stringify(CU));
+      hide('changePassPage');
+      startApp();
+      apiCall({action:'addLog',user:CU.username,logtype:'security',details:'تغيير كلمة المرور (أول دخول)'});
+    } else showErr('changePassErr','خطأ في تغيير كلمة المرور');
+  } catch(e){ showErr('changePassErr','خطأ في الاتصال'); }
+}
+
+async function doForgot(){
+  const p=val('fp'), e=val('fe');
+  if(!p||!e) return showErr('forgotErr','أدخل رقم الموبايل والإيميل');
+  try{
+    const r = await api({action:'resetPassword',phone:p,email:e});
+    if(r.success){ showErr('forgotErr','تم إرسال كلمة مرور جديدة على إيميلك ✓','#d4edda','#155724'); }
+    else showErr('forgotErr','لم يتم العثور على حساب بهذه البيانات');
+  } catch(e){ showErr('forgotErr','خطأ في الاتصال'); }
+}
+
+function startApp(){
+  hide('loginPage'); hide('forgotPage'); hide('changePassPage');
+  document.getElementById('appPage').style.display='flex';
+  const init=(CU.fullname||CU.username).substring(0,2);
+  document.getElementById('tbName').textContent = CU.fullname||CU.username;
+  document.getElementById('tbAvatar').textContent = init;
+  showNotif(`مرحباً ${CU.fullname||CU.username} — دخلت الساعة ${new Date().toLocaleTimeString('ar-EG')}`);
+  setupSidebar();
+  loadEntities();
+  loadUsers();
+  setDate();
+  setSerial();
+  loadNotes();
+  document.getElementById('bonPrinter').value = CU.fullname||CU.username;
+  apiCall({action:'addLog',user:CU.username,logtype:'security',details:'تسجيل دخول'});
+  setTimeout(fixLogos, 500);
+}
+
+function setupSidebar(){
+  const r=CU.role;
+  const hide_nav=(id)=>{ const el=document.getElementById(id); if(el) el.style.display='none'; };
+  if(!hasPerm('add_bons')){ hide_nav('nav-bons'); hide_nav('nav-preview'); }
+  if(!hasPerm('print_bons')) hide_nav('nav-printsaved');
+  if(!hasPerm('view_reports')) hide_nav('nav-reports');
+  if(!['admin','superadmin'].includes(r)){ hide_nav('nav-adduser'); }
+  if(!hasPerm('view_activity_logs') && !['admin','superadmin'].includes(r)) hide_nav('nav-logs');
+  if(!['admin','superadmin'].includes(r)) hide_nav('nav-security');
+  if(r!=='superadmin') hide_nav('nav-deleted');
+  if(!hasPerm('request_qty') && !hasPerm('approve_qty') && !['admin','superadmin'].includes(r)) hide_nav('nav-requests');
+  if(['admin','superadmin'].includes(r)){
+    const ba=document.getElementById('banAllBtn'); if(ba) ba.style.display='inline-flex';
+    const ub=document.getElementById('unbanAllBtn'); if(ub) ub.style.display='inline-flex';
+  }
+}
+
+function hasPerm(p){
+  if(['admin','superadmin'].includes(CU.role)) return true;
+  if(CU.permissions==='all') return true;
+  return (CU.permissions||'').includes(p);
+}
+
+function doLogout(){
+  apiCall({action:'addLog',user:CU.username,logtype:'security',details:'تسجيل خروج'});
+  if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
+  if(reportInterval){ clearInterval(reportInterval); reportInterval=null; }
+  localStorage.removeItem('bon_user');
+  CU=null;
+  hide('appPage');
+  showLogin();
+}
+
+// ==================== NAVIGATION ====================
+const ALL_SECTIONS = ['home','bons','preview','printsaved','entities','reports','requests','chat','users','adduser','logs','security','deleted'];
+
+function goTo(sec){
+  ALL_SECTIONS.forEach(s=>{ const el=document.getElementById('sec-'+s); if(el) el.style.display=s===sec?'block':'none'; });
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const nav=document.getElementById('nav-'+sec); if(nav) nav.classList.add('active');
+  // Always reload data when navigating
+  if(sec==='reports'){ if(reportInterval){clearInterval(reportInterval);reportInterval=null;} loadReports(); }
+  if(sec==='requests') loadRequests();
+  if(sec==='chat'){ loadChat(); startChatPolling(); }
+  if(sec==='users') loadUsers();
+  if(sec==='logs') loadLogs();
+  if(sec==='security') loadSecurityLogs();
+  if(sec==='deleted') loadDeletedRecords();
+  if(sec==='entities'){ loadEntities().then(()=>renderEntities()); }
+  if(sec==='printsaved') setupPrintSaved();
+  if(sec!=='chat' && chatInterval){ clearInterval(chatInterval); chatInterval=null; }
+  if(sec!=='reports' && reportInterval){ clearInterval(reportInterval); reportInterval=null; }
+}
+
+// ==================== WATER TYPE & SERIAL ====================
+function setWaterType(t){
+  waterType=t;
+  document.getElementById('rt-tah').className='radio-card'+(t==='تحلية'?' selected':'');
+  document.getElementById('rt-mua').className='radio-card'+(t==='معالجة'?' selected':'');
+  setSerial();
+}
+
+function setDate(){
+  const d=new Date();
+  document.getElementById('bonDate').value=d.getFullYear()+'/'+(String(d.getMonth()+1).padStart(2,'0'))+'/'+String(d.getDate()).padStart(2,'0');
+}
+
+async function setSerial(){
+  try {
+    const r = await api({action:'getBons'});
+    if(r.success){
+      allBons = r.bons || [];
+      const prefix = waterType==='تحلية'?'T':'M';
+      const sametype = allBons.filter(b=>(b.water_type||'')=== waterType);
+      const maxSerial = sametype.reduce((max, b)=>{
+        const match = (b.serial||'').match(/[TM]-(\d+)/);
+        if(match) return Math.max(max, parseInt(match[1]));
+        return max;
+      }, 0);
+      document.getElementById('bonSerial').value = prefix+'-'+(maxSerial+1);
+    }
+  } catch(e) {
+    const key='serial_'+waterType;
+    const saved = parseInt(localStorage.getItem(key)||'0')+1;
+    const prefix = waterType==='تحلية'?'T':'M';
+    document.getElementById('bonSerial').value = prefix+'-'+saved;
+  }
+}
+
+function setQtyMode(m){
+  qtyMode=m;
+  document.getElementById('mt-auto').className='mode-tab'+(m==='auto'?' active':'');
+  document.getElementById('mt-manual').className='mode-tab'+(m==='manual'?' active':'');
+  document.getElementById('auto-sec').style.display=m==='auto'?'block':'none';
+  document.getElementById('manual-sec').style.display=m==='manual'?'block':'none';
+}
+
+function calcAuto(){
+  const total=parseInt(document.getElementById('totalQty').value)||0;
+  const res=document.getElementById('autoResult');
+  if(total<=0){res.style.display='none';return;}
+  const fp=Math.floor(total/1000), rem=total%1000, lv=rem>0?rem/10:0, tp=fp+(rem>0?1:0);
+  res.style.display='block';
+  res.innerHTML=
+    (fp>0?`${fp} صفحة كاملة (${fp*10} بون × 100م³ = ${fp*1000} م³)<br>`:'') +
+    (rem>0?`آخر صفحة: 10 بونات × ${lv} م³ = ${rem} م³<br>`:'') +
+    `<strong>الإجمالي: ${total} م³ | الصفحات: ${tp} | البونات: ${tp*10}</strong>`;
+}
+
+function addManualRow(){
+  const d=document.createElement('div'); d.className='manual-row';
+  d.innerHTML='<span>حجم البون</span><input type="number" placeholder="م³" oninput="calcManual()"><span>×</span><input type="number" placeholder="عدد" oninput="calcManual()"><span>بون</span>';
+  document.getElementById('manualRows').appendChild(d);
+}
+
+function calcManual(){
+  let total=0;
+  document.querySelectorAll('#manualRows .manual-row').forEach(r=>{
+    const ins=r.querySelectorAll('input');
+    total+=(parseFloat(ins[0].value)||0)*(parseFloat(ins[1].value)||0);
+  });
+  document.getElementById('manualTotal').textContent='الإجمالي: '+total+' م³';
+}
+
+function checkEntityOther(){
+  document.getElementById('bonEntityOther').style.display=val('bonEntity')==='other'?'block':'none';
+}
+function checkNotesOther(){
+  document.getElementById('bonNotesOther').style.display=val('bonNotes')==='other'?'block':'none';
+}
+function checkDeliveryOther(){
+  document.getElementById('bonDeliveryOther').style.display=val('bonDelivery')==='other'?'block':'none';
+}
+
+// ==================== NOTES MANAGEMENT ====================
+function loadNotes(){
+  // Try to load from localStorage, fallback to defaults
+  const saved = localStorage.getItem('bon_notes');
+  if(saved) defaultNotes = JSON.parse(saved);
+  renderNotesDropdown();
+}
+
+function renderNotesDropdown(){
+  const sel = document.getElementById('bonNotes');
+  sel.innerHTML = '<option value="">-- اختر ملاحظة --</option>';
+  defaultNotes.forEach((n,i)=>{
+    sel.innerHTML += `<option value="${n}">${n}</option>`;
+  });
+  sel.innerHTML += '<option value="other">أخرى</option>';
+  // Add delete buttons for admin/superadmin
+  if(CU && ['admin','superadmin'].includes(CU.role)){
+    const container = document.getElementById('notesContainer');
+    let delHtml = '<div style="margin-top:8px;font-size:12px;color:var(--muted);">حذف ملاحظة:</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">';
+    defaultNotes.forEach((n,i)=>{
+      delHtml += `<div style="display:flex;align-items:center;gap:4px;background:#f5f7fa;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;">
+        <span>${n.substring(n.lastIndexOf(' - ')+3)}</span>
+        <button class="note-del-btn" onclick="deleteNote(${i})" title="حذف">×</button>
+      </div>`;
+    });
+    delHtml += '</div>';
+    // Remove old delete section
+    const oldDel = container.querySelector('.notes-delete-section');
+    if(oldDel) oldDel.remove();
+    const div = document.createElement('div');
+    div.className = 'notes-delete-section';
+    div.innerHTML = delHtml;
+    container.appendChild(div);
+  }
+}
+
+function deleteNote(index){
+  if(!confirm('هل أنت متأكد من حذف هذه الملاحظة؟')) return;
+  const deleted = defaultNotes.splice(index, 1)[0];
+  localStorage.setItem('bon_notes', JSON.stringify(defaultNotes));
+  renderNotesDropdown();
+  // Archive to deleted records
+  addToDeleted('note', deleted, CU.username);
+  apiCall({action:'addLog',user:CU.username,logtype:'activity',details:'حذف ملاحظة: '+deleted});
+}
+
+// ==================== ENTITIES ====================
+async function loadEntities(){
+  try{
+    const r=await api({action:'getEntities'});
+    if(r.success){
+      entities=r.entities||[];
+      updateEntityDropdowns();
+    }
+  }catch(e){}
+}
+
+function updateEntityDropdowns(){
+  const sel=document.getElementById('bonEntity');
+  const rsel=document.getElementById('req_entity');
+  const psel=document.getElementById('psEntity');
+  const defaultOpts=['قسم شرطة أول شرم الشيخ','إدارة الرصد الأمني بالرويسات','إدارة تأمين المناطق السياحية','إدارة مرور جنوب سيناء','المركز الطبي بالرويسات','الشركة المصرية لنقل الكهرباء','إدارة سيناء لتدريب كلاب الأمن'];
+  const apiEntities = entities.map(e=>e.name||e);
+  const allEntities = [...new Set([...defaultOpts,...apiEntities])];
+
+  if(sel){
+    sel.innerHTML='<option value="">-- اختر الجهة --</option>';
+    allEntities.forEach(e=>sel.innerHTML+=`<option value="${e}">${e}</option>`);
+    if(hasPerm('add_entity')) sel.innerHTML+=`<option value="other">+ إضافة جهة جديدة</option>`;
+  }
+  if(rsel){
+    rsel.innerHTML='<option value="">-- اختر الجهة --</option>';
+    allEntities.forEach(e=>rsel.innerHTML+=`<option value="${e}">${e}</option>`);
+  }
+  if(psel){
+    psel.innerHTML='<option value="all">الكل</option>';
+    allEntities.forEach(e=>psel.innerHTML+=`<option value="${e}">${e}</option>`);
+  }
+  loadEntitiesCheck(allEntities);
+}
+
+function loadEntitiesCheck(ents){
+  const wrap=document.getElementById('entitiesCheck');
+  if(!wrap) return;
+  wrap.innerHTML='<div class="entity-cb"><input type="checkbox" id="ec-all" checked onchange="toggleAllEntities(this)"><label for="ec-all">الكل</label></div>';
+  ents.forEach((e,i)=>{
+    wrap.innerHTML+=`<div class="entity-cb"><input type="checkbox" id="ec-${i}" value="${e}" checked><label for="ec-${i}">${e}</label></div>`;
+  });
+}
+
+function toggleAllEntities(cb){
+  document.querySelectorAll('#entitiesCheck input[type=checkbox]').forEach(c=>c.checked=cb.checked);
+}
+
+function renderEntities(){
+  const tbody = document.getElementById('entitiesTbody');
+  if(!tbody) return;
+  const defaultOpts=['قسم شرطة أول شرم الشيخ','إدارة الرصد الأمني بالرويسات','إدارة تأمين المناطق السياحية','إدارة مرور جنوب سيناء','المركز الطبي بالرويسات','الشركة المصرية لنقل الكهرباء','إدارة سيناء لتدريب كلاب الأمن'];
+  const allItems = [...defaultOpts.map(n=>({name:n,type:'حكومي',added_by:'النظام',created_at:'-'})), ...entities.map(e=>typeof e==='string'?{name:e,type:'-',added_by:'-',created_at:'-'}:e)];
+
+  tbody.innerHTML = '';
+  allItems.forEach((e,i)=>{
+    const typeClass = e.type==='حكومي'?'entity-gov':e.type==='تجاري'?'entity-com':'entity-res';
+    const canDelete = ['admin','superadmin'].includes(CU.role);
+    const canEdit = CU.role==='superadmin';
+    tbody.innerHTML+=`<tr>
+      <td>${i+1}</td>
+      <td>${e.name}</td>
+      <td><span class="entity-type-badge ${typeClass}">${e.type||'-'}</span></td>
+      <td>${e.added_by||'-'}</td>
+      <td>${e.created_at||'-'}</td>
+      <td>
+        ${canEdit?`<button class="btn btn-outline btn-sm" onclick="showEditEntity('${e.name}')">✏️ تعديل</button>`:''} 
+        ${canDelete && e.added_by!=='النظام'?`<button class="btn btn-danger btn-sm" onclick="deleteEntity('${e.name}')">🗑️ حذف</button>`:''}
+      </td>
+    </tr>`;
+  });
+  // Show/hide add entity card
+  const addCard = document.getElementById('addEntityCard');
+  if(addCard) addCard.style.display = hasPerm('add_entity')?'block':'none';
+}
+
+async function addEntity(){
+  const name=val('newEntityName'), type=val('newEntityType');
+  if(!name.trim()) return alert('أدخل اسم الجهة');
+  try{
+    const r=await api({action:'addEntity',name,type,added_by:CU.username});
+    if(r.success){
+      document.getElementById('newEntityName').value='';
+      await loadEntities();
+      renderEntities();
+      apiCall({action:'addLog',user:CU.username,logtype:'activity',details:'إضافة جهة: '+name});
+      alert('تم إضافة الجهة بنجاح ✓');
+    } else alert('خطأ: '+(r.msg||''));
+  }catch(e){ alert('خطأ في الاتصال'); }
+}
+
+async function deleteEntity(name){
+  if(!confirm('هل أنت متأكد من حذف الجهة: '+name+'؟')) return;
+  try{
+    await api({action:'deleteEntity',name,by:CU.username});
+    addToDeleted('entity', name, CU.username);
+    await loadEntities();
+    renderEntities();
+    apiCall({action:'addLog',user:CU.username,logtype:'activity',details:'حذف جهة: '+name});
+  }catch(e){ alert('خطأ في الحذف'); }
+}
+
+function showEditEntity(name){
+  document.getElementById('ee_old_name').value=name;
+  document.getElementById('ee_new_name').value=name;
+  document.getElementById('editEntityModal').style.display='flex';
+}
+
+async function saveEditEntity(){
+  const oldName=val('ee_old_name'), newName=val('ee_new_name');
+  if(!newName.trim()) return alert('أدخل الاسم الجديد');
+  try{
+    await api({action:'updateEntity',oldName,newName,by:CU.username});
+    closeModal('editEntityModal');
+    await loadEntities();
+    renderEntities();
+    apiCall({action:'addLog',user:CU.username,logtype:'activity',details:`تعديل اسم جهة: ${oldName} → ${newName}`});
+  }catch(e){ alert('خطأ في التعديل'); }
+}
+
+// ==================== USERS ====================
+async function loadUsers(){
+  try{
+    const r=await api({action:'getUsers'});
+    if(r.success){
+      users=r.users||[];
+      updateUserDropdowns();
+      renderUsers();
+    }
+  }catch(e){}
+}
+
+function updateUserDropdowns(){
+  const reqSel=document.getElementById('bonRequester');
+  const appSel=document.getElementById('bonApprover');
+  const delSel=document.getElementById('bonDelivery');
+  if(reqSel) reqSel.innerHTML='<option value="">-- اختر --</option>';
+  if(appSel) appSel.innerHTML='<option value="">-- اختر --</option>';
+  if(delSel) delSel.innerHTML='<option value="">-- اختر --</option>';
+  users.forEach(u=>{
+    const opt=`<option value="${u.username}">${u.fullname||u.username}</option>`;
+    if(reqSel) reqSel.innerHTML+=opt;
+    if(appSel) appSel.innerHTML+=opt;
+    if(delSel) delSel.innerHTML+=opt;
+  });
+  if(delSel) delSel.innerHTML+='<option value="other">أخرى</option>';
+}
+
+function getUserCode(username){
+  const u = users.find(u=>u.username===username);
+  return u?.code || '000';
+}
+
+function renderUsers(){
+  const wrap=document.getElementById('usersList');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const isAdmin = ['admin','superadmin'].includes(CU.role);
+  const isSuper = CU.role==='superadmin';
+
+  users.forEach(u=>{
+    // Superadmin hidden from non-admin
+    if(u.role==='superadmin' && !isAdmin) return;
+    const init=(u.fullname||u.username).substring(0,2);
+    const roleBadge={'superadmin':'badge-red','admin':'badge-blue','user':'badge-orange','subadmin':'badge-orange','viewer':'badge-green'};
+    const roleLabel = u.role==='subadmin'?'User':u.role;
+    const isSuperUser = u.role==='superadmin';
+
+    let actionsHtml = '';
+    if(isAdmin && !isSuperUser){
+      actionsHtml += `<button class="btn btn-outline btn-sm" onclick="showEditUser('${u.username}')">✏️ تعديل</button>`;
+      actionsHtml += `<button class="btn ${u.status==='active'?'btn-warning':'btn-success'} btn-sm" onclick="toggleBan('${u.username}','${u.status}')">
+        ${u.status==='active'?'⛔ حظر':'✅ تفعيل'}</button>`;
+    }
+    if(isSuper && !isSuperUser){
+      actionsHtml += `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">🗑️ حذف</button>`;
+    }
+
+    // Non-admin sees limited info
+    if(!isAdmin){
+      wrap.innerHTML+=`
+      <div class="user-card">
+        <div class="user-avatar-lg">${init}</div>
+        <div class="user-info">
+          <div class="user-name">${u.fullname||u.username} ${u.code?`<span class="user-code">${u.code}</span>`:''}</div>
+          <div class="user-meta">📱 ${u.phone||'-'}</div>
+          <div class="user-meta" style="margin-top:4px;">
+            <span class="badge ${roleBadge[u.role]||'badge-green'}">${roleLabel}</span>
+          </div>
+        </div>
+      </div>`;
+      return;
+    }
+
+    wrap.innerHTML+=`
+    <div class="user-card">
+      <div class="user-avatar-lg">${init}</div>
+      <div class="user-info">
+        <div class="user-name">${u.fullname||u.username} ${u.code?`<span class="user-code">${u.code}</span>`:''}</div>
+        <div class="user-meta">📱 ${u.phone||'-'} &nbsp;|&nbsp; ✉️ ${u.email||'-'}</div>
+        <div class="user-meta" style="margin-top:4px;">
+          <span class="badge ${roleBadge[u.role]||'badge-green'}">${roleLabel}</span>
+          &nbsp; <span class="badge ${u.status==='active'?'badge-green':'badge-red'}">${u.status==='active'?'نشط':'محظور'}</span>
+        </div>
+      </div>
+      <div class="user-actions">${actionsHtml}</div>
+    </div>`;
+  });
+}
+
+function showEditUser(username){
+  const u = users.find(u=>u.username===username);
+  if(!u) return;
+  document.getElementById('eu_username').value=u.username;
+  document.getElementById('eu_name').value=u.fullname||'';
+  document.getElementById('eu_code').value=u.code||'';
+  document.getElementById('eu_phone').value=u.phone||'';
+  document.getElementById('eu_email').value=u.email||'';
+  document.getElementById('eu_role').value=u.role==='subadmin'?'user':u.role;
+  document.getElementById('editUserModal').style.display='flex';
+}
+
+async function saveEditUser(){
+  const username=val('eu_username');
+  const data = {
+    action:'updateUser', username,
+    fullname:val('eu_name'), code:val('eu_code'),
+    phone:val('eu_phone'), email:val('eu_email'),
+    role:val('eu_role'), by:CU.username
+  };
+  try{
+    await api(data);
+    closeModal('editUserModal');
+    await loadUsers();
+    apiCall({action:'addLog',user:CU.username,logtype:'security',details:'تعديل بيانات مستخدم: '+username});
+  }catch(e){ alert('خطأ في التعديل'); }
+}
+
+async function addUser(){
+  const u=val('nu_user'), p=val('nu_pass'), n=val('nu_name'), code=val('nu_code'),
+    ph=val('nu_phone'), e=val('nu_email'), r=val('nu_role');
+  if(!u||!p||!n) return showErr('addUserErr','اسم المستخدم وكلمة المرور والاسم مطلوبين');
+  if(code && !/^\d{3}$/.test(code)) return showErr('addUserErr','الكود يجب أن يكون 3 أرقام (مثال: 001)');
+  const perms=[];
+  ['add_bons','print_bons','view_reports','print_reports','add_entity','del_entity',
+   'request_qty','approve_qty','manage_users','delete','view_activity_logs','view_security_logs']
+    .forEach(p=>{ if(document.getElementById('p_'+p)?.checked) perms.push(p); });
+  try{
+    const res=await api({action:'addUser',username:u,password:p,fullname:n,code,phone:ph,email:e,
+      role:r,permissions:perms.join(','),temp_password:true,by:CU.username});
+    if(res.success){
+      showErr('addUserErr','تم إضافة المستخدم بنجاح ✓','#d4edda','#155724');
+      loadUsers();
+      apiCall({action:'addLog',user:CU.username,logtype:'security',details:'إضافة مستخدم: '+u});
+    }
+    else showErr('addUserErr','خطأ: '+res.msg);
+  }catch(e){ showErr('addUserErr','خطأ في الاتصال'); }
+}
+
+function updatePermsUI(){
+  const role=val('nu_role');
+  const allPerms=['add_bons','print_bons','view_reports','print_reports','add_entity','del_entity',
+    'request_qty','approve_qty','manage_users','delete','view_activity_logs','view_security_logs'];
+  if(['admin'].includes(role)){
+    allPerms.forEach(p=>{ const el=document.getElementById('p_'+p); if(el){el.checked=true;el.disabled=true;} });
+  } else {
+    allPerms.forEach(p=>{ const el=document.getElementById('p_'+p); if(el){el.checked=false;el.disabled=false;} });
+  }
+}
+
+async function deleteUser(username){
+  if(!confirm('هل أنت متأكد من حذف المستخدم '+username+'؟')) return;
+  const u = users.find(u=>u.username===username);
+  await api({action:'deleteUser',username,by:CU.username});
+  addToDeleted('user', JSON.stringify(u), CU.username);
+  loadUsers();
+  apiCall({action:'addLog',user:CU.username,logtype:'security',details:'حذف مستخدم: '+username});
+}
+
+async function toggleBan(username, status){
+  const newStatus = status==='active'?'banned':'active';
+  await api({action:'updateUser',username,status:newStatus,by:CU.username});
+  loadUsers();
+  apiCall({action:'addLog',user:CU.username,logtype:'security',details:`${newStatus==='banned'?'حظر':'تفعيل'} مستخدم: ${username}`});
+}
+
+async function banAll(){
+  if(!confirm('هل أنت متأكد من حظر جميع المستخدمين؟ (لن يشمل SuperAdmin)')) return;
+  for(const u of users){
+    if(u.role!=='superadmin' && u.status==='active'){
+      await api({action:'updateUser',username:u.username,status:'banned',by:CU.username});
+    }
+  }
+  loadUsers();
+  apiCall({action:'addLog',user:CU.username,logtype:'security',details:'حظر جميع المستخدمين'});
+}
+
+async function unbanAll(){
+  if(!confirm('هل أنت متأكد من تفعيل جميع المستخدمين؟')) return;
+  for(const u of users){
+    if(u.role!=='superadmin' && u.status==='banned'){
+      await api({action:'updateUser',username:u.username,status:'active',by:CU.username});
+    }
+  }
+  loadUsers();
+  apiCall({action:'addLog',user:CU.username,logtype:'security',details:'تفعيل جميع المستخدمين'});
+}
+
+// ==================== BON SAVE & PREVIEW ====================
+async function saveBon(){
+  const entity = val('bonEntity')==='other' ? val('bonEntityOther') : val('bonEntity');
+  const notes = val('bonNotes')==='other' ? val('bonNotesOther') : val('bonNotes');
+  if(!entity) return alert('اختر الجهة أولاً');
+  let qty=0, qtyText='';
+  if(qtyMode==='auto'){
+    qty=parseInt(val('totalQty'))||0;
+    qtyText=qty+' متر مكعب';
+  } else {
+    qty=parseInt(document.getElementById('manualTotal').textContent.replace(/[^0-9]/g,''))||0;
+    qtyText=qty+' متر مكعب';
+  }
+  if(qty<=0) return alert('أدخل الكمية أولاً');
+  if(val('bonEntity')==='other' && val('bonEntityOther') && hasPerm('add_entity')){
+    await api({action:'addEntity',name:val('bonEntityOther'),added_by:CU.username});
+    await loadEntities();
+  }
+  const serial=document.getElementById('bonSerial').value;
+  bonData={
+    serial, date:val('bonDate'), quantity:qty, quantity_text:qtyText,
+    entity, transport:val('bonTransport'), notes, water_type:waterType,
+    printed_by:CU.username, requester:val('bonRequester'),
+    approver:val('bonApprover'), delivery:val('bonDelivery')==='other'?val('bonDeliveryOther'):val('bonDelivery')
+  };
+  try{
+    const r=await api({action:'addBon',...bonData});
+    if(r.success){
+      const key='serial_'+waterType;
+      const match = serial.match(/[TM]-(\d+)/);
+      if(match) localStorage.setItem(key, match[1]);
+      alert('تم حفظ البون بنجاح ✓');
+      apiCall({action:'addLog',user:CU.username,logtype:'activity',details:'حفظ بون: '+serial+' - '+entity});
+    }
+  }catch(e){ alert('خطأ في الحفظ'); }
+}
+
+function goPreview(){
+  if(!bonData) return alert('احفظ البون أولاً');
+  goTo('preview');
+  renderPreview();
+}
+
+function renderPreview(){
+  const wrap=document.getElementById('previewContent');
+  if(!bonData){wrap.innerHTML='<p style="color:#888;">لا توجد بيانات بون. ارجع لإنشاء بون أولاً.</p>';return;}
+
+  // Get user codes for the encoded string
+  const reqCode = getUserCode(bonData.requester);
+  const appCode = getUserCode(bonData.approver);
+  const prnCode = getUserCode(bonData.printed_by);
+  const delCode = getUserCode(bonData.delivery);
+  const encodedStr = reqCode + appCode + prnCode + delCode;
+
+  const total=bonData.quantity, fp=Math.floor(total/1000), rem=total%1000, lv=rem>0?rem/10:0, tp=fp+(rem>0?1:0);
+  let html='';
+  let serial=1;
+  for(let p=0;p<tp;p++){
+    const isLast=p===tp-1&&rem>0, bv=isLast?lv:100;
+    const bvS=isLast?bv+' م³':'100 م³';
+    const bvF=isLast?bv+' متر مكعب (مياه '+bonData.water_type+')':'مائة متر مكعب (مياه '+bonData.water_type+')';
+    html+=`<div class="page-label-pr" style="font-size:11px;color:#555;text-align:center;margin-bottom:6px;">صفحة ${p+1} من ${tp}${isLast?' — آخر صفحة':''}</div>`;
+    html+=`<div class="preview-page"><div class="bon-grid-print">`;
+    for(let b=0;b<10;b++){
+      const qrId='qr-'+p+'-'+b;
+      html+=`<div class="bon-print">
+        <div class="bon-wm">مياه شرم الشيخ</div>
+        <div class="bon-top">
+          <div class="bon-logo-sm"><img src="assets/logo.jpg" alt="لوجو" onerror="this.style.display='none'"></div>
+          <div class="bon-co">شركة مياه الشرب والصرف الصحي<br>بشمال وجنوب سيناء<br>قطاع الجنوب منطقة شرم الشيخ</div>
+        </div>
+        <div class="bon-row-p"><span class="bon-lbl">مسلسل البون</span><span class="bon-val">${bonData.serial}-${serial}</span>
+          <span class="bon-lbl" style="margin-right:6px;">التاريخ</span><span class="bon-val">${bonData.date}</span></div>
+        <div class="bon-row-p"><span class="bon-lbl">الكمية</span><span class="bon-val">${bvS} ${bvF}</span></div>
+        <div class="bon-row-p"><span class="bon-lbl">الجهة</span><span class="bon-val">${bonData.entity} (${bonData.transport})</span></div>
+        <div class="bon-row-p"><span class="bon-lbl">المختص</span><span class="bon-val"><span class="sig-ln"></span></span>
+          <span class="bon-lbl" style="margin-right:6px;">مدير المنطقة</span><span class="bon-val"><span class="sig-ln"></span></span></div>
+        <div class="bon-note-p">${bonData.notes||'لا يعتد بالبون إلا بختم المنطقة'}</div>
+        <div class="bon-code" style="font-size:7px;color:#555;text-align:center;font-family:monospace;letter-spacing:1px;margin-top:2px;direction:ltr;">${encodedStr}</div>
+        <div class="bon-qr" id="${qrId}"></div>
+      </div>`;
+      serial++;
+    }
+    html+=`</div></div>`;
+  }
+  wrap.innerHTML=html;
+  // Generate QR codes
+  let s2=1;
+  for(let p=0;p<tp;p++) for(let b=0;b<10;b++){
+    try{
+      new QRCode(document.getElementById('qr-'+p+'-'+b),{
+        text:`${encodedStr}|${bonData.serial}-${s2}|${bonData.date}`,
+        width:32,height:32,correctLevel:QRCode.CorrectLevel.L
+      });
+    }catch(e){}
+    s2++;
+  }
+}
+
+// ==================== PRINT SAVED BONS ====================
+function setupPrintSaved(){
+  updateEntityDropdowns();
+}
+
+async function loadSavedBons(){
+  try{
+    const r=await api({action:'getBons'});
+    if(!r.success) return;
+    let bons = r.bons || [];
+    // Apply filters
+    const fromS=val('psFrom'), toS=val('psTo'), ent=val('psEntity'), df=val('psDateFrom'), dt=val('psDateTo');
+    if(ent && ent!=='all') bons=bons.filter(b=>b.entity===ent);
+    if(df) bons=bons.filter(b=>b.date>=df);
+    if(dt) bons=bons.filter(b=>b.date<=dt);
+    // Serial range filter
+    if(fromS || toS){
+      bons = bons.filter(b=>{
+        const m = (b.serial||'').match(/[TM]-(\d+)/);
+        if(!m) return false;
+        const n = parseInt(m[1]);
+        const fM = fromS?fromS.match(/[TM]-(\d+)/):null;
+        const tM = toS?toS.match(/[TM]-(\d+)/):null;
+        if(fM && n < parseInt(fM[1])) return false;
+        if(tM && n > parseInt(tM[1])) return false;
+        return true;
+      });
+    }
+    const tbody=document.getElementById('savedBonsTbody');
+    tbody.innerHTML='';
+    bons.forEach(b=>{
+      tbody.innerHTML+=`<tr>
+        <td><input type="checkbox" class="bon-select" value='${JSON.stringify(b).replace(/'/g,"&#39;")}'></td>
+        <td>${b.serial||'-'}</td><td>${b.date||'-'}</td>
+        <td><span class="badge ${b.water_type==='تحلية'?'badge-blue':'badge-green'}">${b.water_type==='تحلية'?'T':'M'}</span></td>
+        <td>${b.quantity||'-'} م³</td><td>${b.entity||'-'}</td><td>${b.transport||'-'}</td>
+        <td><span class="badge badge-green">محفوظ</span></td>
+      </tr>`;
+    });
+    updateSelectedCount();
+  }catch(e){}
+}
+
+function toggleSelectAll(){
+  const cbs = document.querySelectorAll('.bon-select');
+  const allChecked = [...cbs].every(c=>c.checked);
+  cbs.forEach(c=>c.checked=!allChecked);
+  const cb = document.getElementById('selectAllCb');
+  if(cb) cb.checked = !allChecked;
+  updateSelectedCount();
+}
+
+function updateSelectedCount(){
+  const count = document.querySelectorAll('.bon-select:checked').length;
+  const el = document.getElementById('selectedCount');
+  if(el) el.textContent = count>0?`${count} بون محدد`:'';
+}
+
+function printSelectedBons(){
+  const selected = [...document.querySelectorAll('.bon-select:checked')].map(c=>JSON.parse(c.value));
+  if(selected.length===0) return alert('حدد بونات أولاً');
+  // Create preview for selected bons and print
+  const wrap = document.getElementById('savedBonsPreview');
+  let html = '<div class="preview-page"><div class="bon-grid-print">';
+  selected.forEach((b,i)=>{
+    if(i>0 && i%10===0) html+='</div></div><div class="preview-page"><div class="bon-grid-print">';
+    if(i%2===0 && i%10!==0) html+='<hr class="bon-separator" style="grid-column:1/-1;">';
+    const reqCode=getUserCode(b.requester), appCode=getUserCode(b.approver);
+    const prnCode=getUserCode(b.printed_by), delCode=getUserCode(b.delivery);
+    const encoded=reqCode+appCode+prnCode+delCode;
+    html+=`<div class="bon-print">
+      <div class="bon-wm">مياه شرم الشيخ</div>
+      <div class="bon-top">
+        <div class="bon-logo-sm"><img src="assets/logo.jpg" alt="لوجو" onerror="this.style.display='none'"></div>
+        <div class="bon-co">شركة مياه الشرب والصرف الصحي<br>بشمال وجنوب سيناء<br>قطاع الجنوب منطقة شرم الشيخ</div>
+      </div>
+      <div class="bon-row-p"><span class="bon-lbl">مسلسل البون</span><span class="bon-val">${b.serial||'-'}</span>
+        <span class="bon-lbl" style="margin-right:6px;">التاريخ</span><span class="bon-val">${b.date||'-'}</span></div>
+      <div class="bon-row-p"><span class="bon-lbl">الكمية</span><span class="bon-val">${b.quantity||'-'} م³</span></div>
+      <div class="bon-row-p"><span class="bon-lbl">الجهة</span><span class="bon-val">${b.entity||'-'} (${b.transport||'-'})</span></div>
+      <div class="bon-row-p"><span class="bon-lbl">المختص</span><span class="bon-val"><span class="sig-ln"></span></span>
+        <span class="bon-lbl" style="margin-right:6px;">مدير المنطقة</span><span class="bon-val"><span class="sig-ln"></span></span></div>
+      <div class="bon-note-p">${b.notes||'لا يعتد بالبون إلا بختم المنطقة'}</div>
+      <div class="bon-code">${encoded}</div>
+    </div>`;
+  });
+  html+='</div></div>';
+  wrap.innerHTML = html;
+  setTimeout(()=>window.print(), 300);
+}
+
+// ==================== REPORTS ====================
+async function loadReports(){
+  try{
+    const from=val('repFrom'), to=val('repTo'), type=val('repType');
+    const checkedEntities=[...document.querySelectorAll('#entitiesCheck input[type=checkbox]:checked:not(#ec-all)')].map(c=>c.value);
+    const r=await api({action:'getBons',from,to,entity:'all'});
+    if(r.success){
+      let bons=r.bons||[];
+      allBons = bons;
+      if(type!=='all') bons=bons.filter(b=>b.water_type===type);
+      if(checkedEntities.length>0) bons=bons.filter(b=>checkedEntities.includes(b.entity));
+      // Sort: newest first
+      bons.sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
+      const tbody=document.getElementById('reportsTbody');
+      tbody.innerHTML='';
+      bons.forEach(b=>{
+        const canDel=['admin','superadmin'].includes(CU.role);
+        // Progressive status
+        let statusHtml = buildStatusFlow(b);
+        tbody.innerHTML+=`<tr>
+          <td>${b.serial||'-'}</td><td>${b.date||'-'}</td>
+          <td><span class="badge ${b.water_type==='تحلية'?'badge-blue':'badge-green'}">${b.water_type==='تحلية'?'T':'M'}</span></td>
+          <td>${b.quantity||'-'} م³</td><td>${b.entity||'-'}</td><td>${b.transport||'-'}</td>
+          <td>${statusHtml}</td>
+          <td>${canDel?`<button class="btn btn-danger btn-sm" onclick="deleteBon('${b.id}')">🗑️</button>`:'-'}</td>
+        </tr>`;
+      });
+    }
+  }catch(e){}
+  // Auto refresh
+  if(document.getElementById('autoRefreshCb')?.checked && !reportInterval){
+    reportInterval = setInterval(loadReports, 5000);
+  }
+}
+
+function buildStatusFlow(b){
+  let html = '<div class="status-flow">';
+  if(b.requester){
+    html += `<div class="status-step done"><span class="dot"></span>تم الطلب من ${getDisplayName(b.requester)}</div>`;
+  }
+  if(b.approver){
+    html += `<div class="status-step done"><span class="dot"></span>تم الموافقة من ${getDisplayName(b.approver)}</div>`;
+  }
+  if(b.printed_by){
+    html += `<div class="status-step done"><span class="dot"></span>تم الطباعة من ${getDisplayName(b.printed_by)}</div>`;
+  }
+  if(b.delivery){
+    html += `<div class="status-step done"><span class="dot"></span>تم التسليم لـ ${getDisplayName(b.delivery)}</div>`;
+  }
+  if(!b.delivery && b.printed_by) html += `<div class="status-step current"><span class="dot"></span>في انتظار التسليم</div>`;
+  if(!b.printed_by && !b.delivery) html += `<div class="status-step current"><span class="dot"></span>في انتظار الطباعة</div>`;
+  html += '</div>';
+  return html;
+}
+
+function getDisplayName(username){
+  const u = users.find(u=>u.username===username);
+  return u?.fullname || username;
+}
+
+function toggleAutoRefresh(){
+  if(!document.getElementById('autoRefreshCb').checked){
+    if(reportInterval){ clearInterval(reportInterval); reportInterval=null; }
+  } else {
+    reportInterval = setInterval(loadReports, 5000);
+  }
+}
+
+async function deleteBon(id){
+  if(!confirm('هل أنت متأكد من حذف هذا البون؟')) return;
+  const bon = allBons.find(b=>b.id===id);
+  await api({action:'deleteBon',id,by:CU.username});
+  addToDeleted('bon', JSON.stringify(bon), CU.username);
+  loadReports();
+  apiCall({action:'addLog',user:CU.username,logtype:'activity',details:'حذف بون: '+(bon?.serial||id)});
+}
+
+function exportExcel(){
+  const table=document.getElementById('reportsTable');
+  const wb=XLSX.utils.table_to_book(table);
+  XLSX.writeFile(wb,'تقرير_البونات.xlsx');
+}
+
+function exportPDF(){
+  const element = document.getElementById('reportsTable');
+  const opt = {
+    margin: [10,5,10,5],
+    filename: 'تقرير_البونات.pdf',
+    image: {type:'jpeg',quality:0.98},
+    html2canvas: {scale:2,useCORS:true,letterRendering:true,logging:false},
+    jsPDF: {unit:'mm',format:'a4',orientation:'landscape'}
+  };
+  // Clone table and fix for PDF
+  const clone = element.cloneNode(true);
+  clone.style.direction='rtl';
+  clone.style.fontFamily='Arial,sans-serif';
+  const tmpDiv = document.createElement('div');
+  tmpDiv.style.cssText='position:fixed;top:-9999px;direction:rtl;font-family:Arial,sans-serif;font-size:12px;';
+  tmpDiv.appendChild(clone);
+  document.body.appendChild(tmpDiv);
+  html2pdf().set(opt).from(tmpDiv).save().then(()=>document.body.removeChild(tmpDiv));
+}
+
+// ==================== REQUESTS ====================
+async function loadRequests(){
+  try{
+    const r=await api({action:'getRequests',requester:hasPerm('approve_qty')?null:CU.username});
+    if(r.success){
+      let requests = r.requests||[];
+      requests.sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
+      const tbody=document.getElementById('reqTbody');
+      tbody.innerHTML='';
+      requests.forEach(req=>{
+        const canApprove=hasPerm('approve_qty')&&req.status==='pending';
+        const canCreateBon = (hasPerm('add_bons')||['admin','superadmin'].includes(CU.role)) && req.status==='approved';
+        const canPrint = req.status==='created';
+
+        let actionHtml = '';
+        if(canApprove){
+          actionHtml = `<button class="btn btn-success btn-sm" onclick="approveReq('${req.id}','approved')">✅ موافقة</button>
+            <button class="btn btn-danger btn-sm" onclick="approveReq('${req.id}','rejected')">❌ رفض</button>`;
+        } else if(canCreateBon){
+          actionHtml = `<button class="btn btn-primary btn-sm" onclick="createBonFromReq('${req.id}','${req.entity}','${req.requester}','${req.approved_by||''}')">📋 إنشاء بون</button>`;
+        } else if(canPrint){
+          actionHtml = `<button class="btn btn-purple btn-sm" onclick="printReqBon('${req.id}')">🖨️</button>`;
+        } else if(req.status==='printed'){
+          actionHtml = '<span class="badge badge-green">✓ تم الطباعة</span>';
+        } else {
+          actionHtml = '-';
+        }
+
+        let statusBadge = '';
+        if(req.status==='pending') statusBadge='<span class="badge badge-orange">قيد الانتظار</span>';
+        else if(req.status==='approved') statusBadge='<span class="badge badge-blue">تم التصديق</span>';
+        else if(req.status==='rejected') statusBadge='<span class="badge badge-red">مرفوض</span>';
+        else if(req.status==='created') statusBadge='<span class="badge badge-purple">تم الإنشاء</span>';
+        else if(req.status==='printed') statusBadge='<span class="badge badge-green">تم الطباعة</span>';
+
+        tbody.innerHTML+=`<tr>
+          <td>${getDisplayName(req.requester)}</td><td>${req.entity}</td><td>${req.quantity} م³</td>
+          <td>${req.approved_by?getDisplayName(req.approved_by):'-'}</td>
+          <td>${statusBadge}</td>
+          <td>${req.created_at}</td>
+          <td>${req.file_url?`<a href="${req.file_url}" target="_blank">📎 عرض</a>`:'-'}</td>
+          <td>${actionHtml}</td>
+        </tr>`;
+      });
+    }
+  }catch(e){}
+}
+
+function printReqBon(reqId){
+  apiCall({action:'approveRequest',id:reqId,status:'printed',by:CU.username});
+  window.print();
+  loadRequests();
+}
+
+function showReqModal(){ document.getElementById('reqModal').style.display='flex'; }
+
+async function submitRequest(){
+  const entity=val('req_entity'), qty=val('req_qty');
+  if(!entity||!qty) return alert('اختر الجهة وأدخل الكمية');
+  await api({action:'addRequest',requester:CU.username,entity,quantity:qty,file_url:''});
+  closeModal('reqModal');
+  loadRequests();
+  apiCall({action:'addLog',user:CU.username,logtype:'activity',details:`طلب كمية: ${qty} م³ - ${entity}`});
+  alert('تم إرسال الطلب بنجاح ✓');
+}
+
+async function approveReq(id, status){
+  await api({action:'approveRequest',id,status,by:CU.username});
+  loadRequests();
+  apiCall({action:'addLog',user:CU.username,logtype:'activity',details:`${status==='approved'?'موافقة على':'رفض'} طلب كمية`});
+}
+
+function createBonFromReq(reqId, entity, requester, approver){
+  // Navigate to bon creation with pre-filled data
+  goTo('bons');
+  setTimeout(()=>{
+    // Set entity
+    const sel = document.getElementById('bonEntity');
+    for(let i=0; i<sel.options.length; i++){
+      if(sel.options[i].value===entity){ sel.selectedIndex=i; break; }
+    }
+    // Set requester
+    const rSel = document.getElementById('bonRequester');
+    for(let i=0; i<rSel.options.length; i++){
+      if(rSel.options[i].value===requester){ rSel.selectedIndex=i; break; }
+    }
+    // Set approver
+    const aSel = document.getElementById('bonApprover');
+    for(let i=0; i<aSel.options.length; i++){
+      if(aSel.options[i].value===approver){ aSel.selectedIndex=i; break; }
+    }
+    // Update request status
+    apiCall({action:'approveRequest',id:reqId,status:'created',by:CU.username});
+  }, 200);
+}
+
+// ==================== CHAT ====================
+let chatCache = [];
+
+function startChatPolling(){
+  if(chatInterval) clearInterval(chatInterval);
+  chatInterval = setInterval(loadChat, 2000);
+}
+
+async function loadChat(){
+  try{
+    const r=await api({action:'getChat'});
+    if(r.success){
+      const messages = (r.messages||[]).slice(-50); // Last 50 messages
+      // Check if messages changed
+      if(JSON.stringify(messages)===JSON.stringify(chatCache)) return;
+      chatCache = messages;
+      const wrap=document.getElementById('chatMsgs');
+      wrap.innerHTML='';
+      messages.forEach(m=>{
+        const isMe=m.sender===CU.username;
+        // Parse mentions
+        let msgHtml = escapeHtml(m.message).replace(/@(\S+)/g, '<span class="mention-tag">@$1</span>');
+        wrap.innerHTML+=`<div class="chat-msg ${isMe?'me':'other'}">
+          <div class="chat-sender">${isMe?'أنت':getDisplayName(m.sender)}</div>
+          <div class="chat-bubble">${msgHtml}</div>
+          <div class="chat-time">${m.created_at}</div>
+        </div>`;
+      });
+      wrap.scrollTop=wrap.scrollHeight;
+    }
+  }catch(e){}
+}
+
+function handleChatKey(e){
+  const dd = document.getElementById('mentionDropdown');
+  if(dd.classList.contains('show')){
+    const items = dd.querySelectorAll('.mention-item');
+    const activeIdx = [...items].findIndex(i=>i.classList.contains('active'));
+    if(e.key==='ArrowDown'){
+      e.preventDefault();
+      items.forEach(i=>i.classList.remove('active'));
+      items[(activeIdx+1)%items.length]?.classList.add('active');
+      return;
+    }
+    if(e.key==='ArrowUp'){
+      e.preventDefault();
+      items.forEach(i=>i.classList.remove('active'));
+      items[(activeIdx-1+items.length)%items.length]?.classList.add('active');
+      return;
+    }
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const active = dd.querySelector('.mention-item.active');
+      if(active) selectMention(active.dataset.username);
+      else if(items.length>0) selectMention(items[0].dataset.username);
+      return;
+    }
+    if(e.key==='Escape'){
+      dd.classList.remove('show');
+      return;
+    }
+  }
+  if(e.key==='Enter') sendChat();
+}
+
+function handleMention(e){
+  const input = document.getElementById('chatInput');
+  const val = input.value;
+  const cursorPos = input.selectionStart;
+  // Find @ before cursor
+  const beforeCursor = val.substring(0, cursorPos);
+  const atIdx = beforeCursor.lastIndexOf('@');
+  const dd = document.getElementById('mentionDropdown');
+
+  if(atIdx>=0 && (atIdx===0 || beforeCursor[atIdx-1]===' ')){
+    const query = beforeCursor.substring(atIdx+1).toLowerCase();
+    const filtered = users.filter(u=>{
+      const name = (u.fullname||u.username).toLowerCase();
+      return name.includes(query) || u.username.toLowerCase().includes(query);
+    });
+    if(filtered.length>0){
+      dd.innerHTML = '';
+      filtered.forEach((u,i)=>{
+        const init = (u.fullname||u.username).substring(0,2);
+        dd.innerHTML += `<div class="mention-item ${i===0?'active':''}" data-username="${u.username}" onclick="selectMention('${u.username}')">
+          <div class="mention-avatar">${init}</div>
+          <span>${u.fullname||u.username}</span>
+        </div>`;
+      });
+      dd.classList.add('show');
+      return;
+    }
+  }
+  dd.classList.remove('show');
+}
+
+function selectMention(username){
+  const input = document.getElementById('chatInput');
+  const val = input.value;
+  const cursorPos = input.selectionStart;
+  const beforeCursor = val.substring(0, cursorPos);
+  const atIdx = beforeCursor.lastIndexOf('@');
+  const afterCursor = val.substring(cursorPos);
+  input.value = beforeCursor.substring(0, atIdx) + '@' + username + ' ' + afterCursor;
+  input.focus();
+  document.getElementById('mentionDropdown').classList.remove('show');
+}
+
+async function sendChat(){
+  const msg=val('chatInput');
+  if(!msg.trim()) return;
+  document.getElementById('chatInput').value='';
+  document.getElementById('mentionDropdown').classList.remove('show');
+  await api({action:'addChat',sender:CU.username,message:msg});
+  loadChat();
+}
+
+function escapeHtml(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ==================== LOGS ====================
+async function loadLogs(){
+  try{
+    const r=await api({action:'getLogs'});
+    if(r.success){
+      const tbody=document.getElementById('logsTbody');
+      tbody.innerHTML='';
+      const logs = (r.logs||[]).filter(l=>l.logtype!=='security');
+      [...logs].reverse().forEach(l=>{
+        tbody.innerHTML+=`<tr><td>${l.user}</td><td>${l.action||l.logtype||'-'}</td><td>${l.details}</td><td>${l.created_at}</td></tr>`;
+      });
+    }
+  }catch(e){}
+}
+
+async function loadSecurityLogs(){
+  try{
+    const r=await api({action:'getLogs'});
+    if(r.success){
+      const tbody=document.getElementById('secLogsTbody');
+      tbody.innerHTML='';
+      const secActions = ['login','logout','security'];
+      const logs = (r.logs||[]).filter(l=>secActions.includes(l.logtype) || secActions.includes(l.action) ||
+        (l.details||'').includes('دخول') || (l.details||'').includes('خروج') ||
+        (l.details||'').includes('كلمة مرور') || (l.details||'').includes('صلاحيات') ||
+        (l.details||'').includes('حظر') || (l.details||'').includes('تفعيل') ||
+        (l.details||'').includes('مستخدم'));
+      [...logs].reverse().forEach(l=>{
+        tbody.innerHTML+=`<tr><td>${l.user}</td><td>${l.action||l.logtype||'-'}</td><td>${l.details}</td><td>${l.created_at}</td></tr>`;
+      });
+    }
+  }catch(e){}
+}
+
+// ==================== DELETED RECORDS ====================
+function addToDeleted(type, data, deletedBy){
+  // Save to localStorage and try API
+  const records = JSON.parse(localStorage.getItem('deleted_records')||'[]');
+  records.push({type, data, deleted_by:deletedBy, deleted_at:new Date().toLocaleString('ar-EG')});
+  localStorage.setItem('deleted_records', JSON.stringify(records));
+  // Try API call (may not exist yet)
+  try{ apiCall({action:'addToDeleted',type,data,deleted_by:deletedBy}); }catch(e){}
+}
+
+function loadDeletedRecords(){
+  const records = JSON.parse(localStorage.getItem('deleted_records')||'[]');
+  renderDeletedRecords(records);
+  // Also try to load from API
+  api({action:'getDeletedRecords'}).then(r=>{
+    if(r?.success && r.records) renderDeletedRecords([...records,...r.records]);
+  }).catch(()=>{});
+}
+
+function renderDeletedRecords(records){
+  const filtered = deletedFilter==='all'?records:records.filter(r=>r.type===deletedFilter);
+  const tbody = document.getElementById('deletedTbody');
+  tbody.innerHTML='';
+  const typeLabels = {bon:'بون',entity:'جهة',user:'مستخدم',note:'ملاحظة',chat:'محادثة'};
+  const typeBadges = {bon:'badge-blue',entity:'badge-green',user:'badge-orange',note:'badge-purple',chat:'badge-red'};
+  [...filtered].reverse().forEach(r=>{
+    tbody.innerHTML+=`<tr>
+      <td><span class="badge ${typeBadges[r.type]||'badge-blue'}">${typeLabels[r.type]||r.type}</span></td>
+      <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.data}</td>
+      <td>${r.deleted_by||'-'}</td>
+      <td>${r.deleted_at||'-'}</td>
+    </tr>`;
+  });
+}
+
+function filterDeleted(type, btn){
+  deletedFilter = type;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadDeletedRecords();
+}
+
+// ==================== HELPERS ====================
+function showNotif(msg){
+  document.getElementById('notifTxt').textContent=msg;
+  document.getElementById('notifBar').style.display='flex';
+  document.getElementById('notifDot').style.display='block';
+}
+function closeNotif(){ document.getElementById('notifBar').style.display='none'; }
+function toggleNotif(){ const b=document.getElementById('notifBar'); b.style.display=b.style.display==='none'?'flex':'none'; }
+function showHelp(pg){ const h=HELP[pg]||{title:'مساعدة',body:'لا توجد معلومات.'}; document.getElementById('helpTitle').textContent=h.title; document.getElementById('helpBody').textContent=h.body; document.getElementById('helpModal').style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+function hide(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+function val(id){ const el=document.getElementById(id); return el?el.value:''; }
+function showErr(id,msg,bg='#fee2e2',color='#c00'){ const el=document.getElementById(id); if(el){el.style.display='block';el.style.background=bg;el.style.color=color;el.textContent=msg;} }
+function showLoading(text='جاري التحميل...'){
+  document.getElementById('loadingText').textContent=text;
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading(){ document.getElementById('loadingOverlay').classList.remove('show'); }
+
+function resetBonForm(){
+  document.getElementById('totalQty').value='';
+  document.getElementById('autoResult').style.display='none';
+  document.getElementById('bonEntity').value='';
+  document.getElementById('bonNotes').value='';
+  document.getElementById('bonEntityOther').style.display='none';
+  document.getElementById('bonNotesOther').style.display='none';
+  bonData=null;
+  setWaterType('تحلية');
+  setSerial();
+}
+
+async function api(data){
+  const r=await fetch(API,{method:'POST',body:JSON.stringify(data)});
+  return await r.json();
+}
+async function apiCall(data){ try{ await fetch(API,{method:'POST',body:JSON.stringify(data)}); }catch(e){} }
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(document.getElementById('loginPage').style.display!=='none') doLogin();
+    if(document.getElementById('forgotPage').style.display!=='none') doForgot();
+  }
+});
+
+// Listen for checkbox changes in print saved
+document.addEventListener('change', e=>{
+  if(e.target.classList.contains('bon-select')) updateSelectedCount();
+});
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منظومة إدارة بونات منطقة شرم الشيخ</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
