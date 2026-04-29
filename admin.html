@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>الإدارة</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <select onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>استلنس</option><option>حديد</option><option>بلاستيك</option><option>فيبرجلاس</option><option value="other">➕ أخرى...</option></select>
+            </div>
+            <div class="fg"><label>حجم التانك (م³)</label><input type="number" id="eq-tsz" placeholder="مثال: 10" step="0.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">⛽ الوقود</div>
+        <div class="fgrid c3">
+          <div class="fg"><label>نوع الوقود</label>
+            <select id="eq-ft" onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>سولار</option><option>بنزين</option><option value="other">➕ أخرى...</option></select>
+          </div>
+          <div class="fg"><label>حجم خزان الوقود (لتر)</label><input type="number" id="eq-ftk" placeholder="مثال: 400"></div>
+          <div class="fg"><label>متوسط الاستهلاك (كم/لتر)</label><input type="number" id="eq-fa" placeholder="مثال: 8" step="0.5"></div>
+          <div class="fg"><label>رقم كارت السولار</label><input type="text" id="eq-fc" placeholder="رقم الكارت"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">🛢️ الزيت والفلاتر والمهمات</div>
+        <div class="fgrid c4">
+          <div class="fg"><label>لزوجة زيت المحرك</label>
+            <select id="eq-ov" onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>5W-40</option><option>10W-40</option><option>15W-40</option><option>20W-50</option><option>25W-50</option><option value="other">➕ أخرى...</option></select>
+          </div>
+          <div class="fg"><label>كمية زيت المحرك (لتر)</label><input type="number" id="eq-oq" placeholder="مثال: 12" step="0.5"></div>
+          <div class="fg"><label>مياه التبريد</label>
+            <select onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>ماء عادي</option><option>كولانت أزرق</option><option>كولانت أخضر</option><option value="other">➕ أخرى...</option></select>
+          </div>
+          <div class="fg"><label>لزوجة زيت الفتيس</label>
+            <select onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>80W-90</option><option>85W-140</option><option value="other">➕ أخرى...</option></select>
+          </div>
+          <div class="fg"><label>نوع زيت الفتيس</label><input type="text" id="eq-gt" placeholder="النوع"></div>
+          <div class="fg"><label>لزوجة زيت الكورونا</label>
+            <select onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>80W-90</option><option>85W-140</option><option value="other">➕ أخرى...</option></select>
+          </div>
+          <div class="fg"><label>كمية زيت الكورونا (لتر)</label><input type="number" placeholder="لتر" step="0.5"></div>
+          <div class="fg"><label>لزوجة زيت الهيدروليك</label>
+            <select onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>AW32</option><option>AW46</option><option>AW68</option><option value="other">➕ أخرى...</option></select>
+          </div>
+          <div class="fg"><label>كمية زيت الهيدروليك (لتر)</label><input type="number" placeholder="لتر" step="0.5"></div>
+          <div class="fg s4"><label>ملاحظات زيوت أخرى</label><textarea id="eq-on" placeholder="زيوت إضافية..." style="min-height:50px"></textarea></div>
+          <div class="fg"><label>فلتر الزيت</label><input type="text" id="eq-f1" placeholder="رقم الفلتر"></div>
+          <div class="fg"><label>فلتر الجاز</label><input type="text" id="eq-f2" placeholder="رقم الفلتر"></div>
+          <div class="fg"><label>فلتر الفاصل</label><input type="text" id="eq-f3" placeholder="رقم الفلتر"></div>
+          <div class="fg"><label>فلتر المجفف</label><input type="text" id="eq-f4" placeholder="رقم الفلتر"></div>
+          <div class="fg"><label>فلتر الهواء</label><input type="text" id="eq-f5" placeholder="رقم الفلتر"></div>
+          <div class="fg"><label>فلتر التكييف</label><input type="text" id="eq-f6" placeholder="رقم الفلتر"></div>
+          <div class="fg"><label>السيور (إن وجدت)</label><input type="text" id="eq-bl" placeholder="رقم / مقاس"></div>
+          <div class="fg"><label>مقاس الكاوتش</label><input type="text" id="eq-tr" placeholder="مثال: 315/80R22.5"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">📷 الصور والملفات</div>
+        <div class="fgrid c2">
+          <div class="fg"><label>📷 صور المعدة</label><input type="file" id="eq-ph" accept="image/*" multiple></div>
+          <div class="fg"><label>📄 رخصة العربية</label><input type="file" id="eq-ld" accept="image/*,.pdf"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">💰 التكاليف والملاحظات</div>
+        <div class="fgrid c2">
+          <div class="fg"><label>التكلفة التقديرية لكل 100 كم (ألف جنيه)</label><input type="number" id="eq-co" placeholder="مثال: 5" step="0.1"></div>
+          <div class="fg s2"><label>ملاحظات</label><textarea id="eq-no" placeholder="أي ملاحظات إضافية..."></textarea></div>
+  if(mNum===undefined) return;
+    const ld=new Date(parseInt(parts[2]),mNum,parseInt(parts[0]));
+    const diff=(ld-today)/(86400000);
+    if(diff>0&&diff<=30) addNotif('wrn','تنبيه ترخيص',`ترخيص ${getPlate(e)} ينتهي خلال ${Math.round(diff)} يوم`);
+  });
+}
+
+// PAGES
+const pgTitles={dashboard:'لوحة التحكم',vehicles:'السيارات والمعدات',card:'بطاقة المعدات',technical:'الحالة الفنية والمعدات',reportFault:'إبلاغ عن عطل',activeFaults:'عطل قائم',inRepair:'قيد الإصلاح',resolvedFaults:'تم الإصلاح',loans:'السلف',drivers:'سائقي القطاع',users:'المستخدمون',regions:'المناطق',profile:'الملف الشخصي'};
+function go(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  if(el){document.querySelectorAll('.sbi').forEach(i=>i.classList.remove('active'));el.classList.add('active');}
+  document.getElementById('pt').textContent=pgTitles[name]||name;
+  document.getElementById('pb').textContent='الرئيسية › '+(pgTitles[name]||name);
+  if(name==='vehicles') renderV(allE);
+  if(name==='activeFaults') loadAF();
+  if(name==='inRepair') loadIR();
+  if(name==='resolvedFaults') loadRes();
+  if(name==='loans') loadLoans();
+  if(name==='drivers'){loadDrivers();loadDriverSelects();}
+  if(name==='users') loadUsersPage();
+  if(name==='regions') loadRegionsPage();
+}
+function toggleSub(id,el,arrowId){
+  const s=document.getElementById(id);s.classList.toggle('open');
+  document.getElementById(arrowId).textContent=s.classList.contains('open')?'▲':'▼';
+}
+function fAndGo(st){
+  go('vehicles',null);
+  if(st!=='all'){const el=document.getElementById('vfs');if(el){el.value=st;fV();}}
+  else cF();
+}
+
+// PLATE
+function getPlate(e){
+  const c=[(e['حرف1']||''),(e['حرف2']||''),(e['حرف3']||'')].filter(x=>x).join('');
+  const n=[(e['رقم1']||''),(e['رقم2']||''),(e['رقم3']||''),(e['رقم4']||'')].filter(x=>x).join(' ');
+  return(c+(c&&n?' ':'')+n).trim()||'بدون لوحة';
+}
+function pNext(inp,idx,type){
+  if(!inp.value)return;
+  const all=[...document.querySelectorAll(type==='chars'?'.pc':'.pn')];
+  if(all[idx+1]) all[idx+1].focus();
+}
+
+// STATUS BADGE
+function sBdg(s){
+  const m={'صالح':'ok','عاطل':'bad','قيد الإصلاح':'warn','تم طلب سلفة':'pur','تم إصدار سلفة':'pur','جاري':'warn','تم الإصلاح':'tl'};
+  return`<span class="bdg ${m[s]||'warn'}">${s||'-'}</span>`;
+}
+function onSC(r){document.getElementById('bdb').style.display=r.value==='عاطل'?'block':'none';}
+function tD(id,v){const el=document.getElementById(id);if(el)el.style.display=v==='سارية'?'':'none';}
+function tSec(id,show){const el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+
+// VEHICLES TABLE
+const clsOrd=['مياه','صرف','ركوب','معدات','دراجات نارية'];
+function renderV(data){
+  const tb=document.getElementById('vb');
+  <script src="api.js"></script>
+</body>
+</html>
