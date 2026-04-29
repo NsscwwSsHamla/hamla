@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>الأعطال والسلف</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+             <div class="pw">
+              <input class="pn" id="pn1" type="text" maxlength="1" oninput="pNext(this,0,'nums')">
+              <input class="pn" id="pn2" type="text" maxlength="1" oninput="pNext(this,1,'nums')">
+              <input class="pn" id="pn3" type="text" maxlength="1" oninput="pNext(this,2,'nums')">
+              <input class="pn" id="pn4" type="text" maxlength="1" oninput="pNext(this,3,'nums')">
+            </div>
+          </div>
+          <div class="fg"><label>الماركة / النوع *</label>
+            <select id="typeS" onchange="handleOth(this,'othTypM')" required>
+              <option value="">-- اختر --</option>
+              <option>شيفروليه مفرد</option><option>مرسيدس</option><option>فريت لاينر 106</option><option>فريت لاينر 112</option>
+              <option>MAN TGM 18.240</option><option>IVECO Eurocargo</option><option>تويوتا</option><option>ميتسوبيشي</option>
+              <option>هيونداي</option><option>فولفو</option><option>سكانيا</option><option>رينو</option><option>داف</option>
+              <option>إيسوزو</option><option>لودر</option><option>حفار</option><option>كلارك</option><option>ونش</option>
+              <option>بلدوزر</option><option>فورك ليفت</option><option>كومباكتور</option><option>Caterpillar</option>
+              <option value="other">➕ أخرى...</option>
+            </select>
+          </div>
+          <div class="fg"><label>سنة الصنع *</label><select id="yrS" required><option value="">-- السنة --</option></select></div>
+          <div class="fg"><label>رقم الشاسيه</label><input type="text" id="eq-ch" placeholder="رقم الشاسيه"></div>
+          <div class="fg"><label>رقم الموتور</label><input type="text" id="eq-mo" placeholder="رقم الموتور"></div>
+          <div class="fg s3"><label>الوظيفة المنوطة بها *</label>
+            <select id="wazS" onchange="handleOth(this,'othWazM')" required>
+              <option value="">-- اختر --</option>
+              <option>أعمال إدارية وصيانة روافع وخطوط مياه وصرف صحي</option>
+              <option>كلارك تحمل</option><option>فنطاس نقل مياه</option><option>رأس جرار لفنطاس نقل مياه</option>
+              <option>سحب صرف صحي</option><option>حفر وردم</option><option>رفع مخلفات</option>
+              <option>نقل معدات</option><option>صيانة شبكات</option>
+              <option value="other">➕ أخرى...</option>
+            </select>
+          </div>
+          <div class="fg"><label>عهدة على</label><input type="text" id="eq-cu" placeholder="اسم المسؤول"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">🔧 الحالة الفنية *</div>
+        <div class="sopts">
+          <div class="sopt ok"><input type="radio" name="st" id="st1" value="صالح" checked onchange="onSC(this)"><label for="st1">✅ صالح</label></div>
+          <div class="sopt bad"><input type="radio" name="st" id="st2" value="عاطل" onchange="onSC(this)"><label for="st2">🔴 عاطل</label></div>
+          <div class="sopt fix"><input type="radio" name="st" id="st3" value="قيد الإصلاح" onchange="onSC(this)"><label for="st3">🛠️ قيد الإصلاح</label></div>
+          <div class="sopt loan"><input type="radio" name="st" id="st4" value="تم طلب سلفة" onchange="onSC(this)"><label for="st4">📋 تم طلب سلفة</label></div>
+          <div class="sopt iss"><input type="radio" name="st" id="st5" value="تم إصدار سلفة" onchange="onSC(this)"><label for="st5">✔️ تم إصدار سلفة</label></div>
+        </div>
+        <div id="bdb"><div class="fg" style="margin-top:8px"><label style="color:#991b1b">📅 تاريخ العطل</label><input type="date" id="eq-fd" style="max-width:200px"></div></div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">📄 الترخيص</div>
+        <div class="fgrid c3">
+          <div class="fg"><label>حالة الترخيص</label>
+            <select id="licS" onchange="tD('licD',this.value)"><option value="سارية">سارية</option><option value="منتهي">منتهي</option><option value="لا يوجد">لا يوجد</option></select>
+          </div>
+          <div class="fg s2" id="licD"><label>سارية حتى</label>
+            <div style="display:grid;grid-template-columns:65px 1fr 85px;gap:6px">
+              <select id="ld" style="font-size:12px"><option value="">يوم</option></select>
+              <select id="lm" style="font-size:12px"><option value="">شهر</option><option>يناير</option><option>فبراير</option><option>مارس</option><option>أبريل</option><option>مايو</option><option>يونيو</option><option>يوليو</option><option>أغسطس</option><option>سبتمبر</option><option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option></select>
+              <select id="ly" style="font-size:12px"><option value="">سنة</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>ترخيص المقطورة</label>
+            <select id="trS" onchange="tD('trD',this.value)"><option value="لا يوجد">لا يوجد</option><option value="سارية">سارية</option><option value="منتهي">منتهي</option></select>
+          </div>
+          <div class="fg s2" id="trD" style="display:none"><label>المقطورة سارية حتى</label>
+            <div style="display:grid;grid-template-columns:65px 1fr 85px;gap:6px">
+              <select style="font-size:12px"><option value="">يوم</option></select>
+              <select style="font-size:12px"><option value="">شهر</option><option>يناير</option><option>فبراير</option><option>مارس</option><option>أبريل</option><option>مايو</option><option>يونيو</option><option>يوليو</option><option>أغسطس</option><option>سبتمبر</option><option>أكتوبر</option><option>نوفمبر</option><option>ديسمبر</option></select>
+              <select style="font-size:12px"><option value="">سنة</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>📄 صورة الرخصة</label><input type="file" id="eq-lf" accept="image/*,.pdf"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">👤 السائق / المشغل</div>
+        <div class="fgrid c3">
+          <div class="fg"><label>السائق الأول</label><select id="eq-d1"><option value="">-- اختر --</option><option value="other">أخرون</option></select></div>
+          <div class="fg"><label>السائق الثاني</label><select id="eq-d2"><option value="">-- اختر --</option><option value="other">أخرون</option></select></div>
+          <div class="fg"><label>السائق الثالث</label><select id="eq-d3"><option value="">-- اختر --</option><option value="other">أخرون</option></select></div>
+          <div class="fg"><label>الوكيل</label><input type="text" id="eq-ag" placeholder="اسم الوكيل"></div>
+          <div class="fg"><label>تاريخ الاستلام</label><input type="date" id="eq-rd"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="ft">⚙️ التجهيزة المحمولة</div>
+        <div class="tw">
+          <label class="tgl"><input type="checkbox" id="eq-ht" onchange="tSec('eq-ts',this.checked)"><span class="tsl"></span></label>
+          <span class="tlbl">يوجد خزان / تجهيزة محمولة</span>
+        </div>
+        <div id="eq-ts" style="display:none">
+          <div class="fgrid c3">
+            <div class="fg"><label>نوع التجهيزة</label>
+              <select onchange="handleOth(this,'othGenM')"><option value="">-- اختر --</option><option>فنطاس</option><option>وحدة ضخ</option><option>كومبريسور</option><option>رافعة</option><option value="other">➕ أخرى...</option></select>
+            </div>
+            <div class="fg"><label>نوع الخزان المحمول</label>
+        </div>`).join('');
+  });
+}
+function loadCOpts(){
+  loadLS('cTypes','typeS');
+  loadLS('cWaz','wazS');
+}
+function loadLS(key,selId){
+  const sel=document.getElementById(selId);if(!sel)return;
+  const items=JSON.parse(localStorage.getItem(key)||'[]');
+  const oth=sel.querySelector('option[value="other"]');
+  items.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.insertBefore(o,oth);});
+}
+
+// LOAD ALL
+async function loadAll(){
+  const [er,fr]=await Promise.all([api({action:'getEquip',region:'all'}),api({action:'getFaults',region:'all'})]);
+  if(er.status==='ok') allE=er.data||[];
+  if(fr.status==='ok') allF=fr.data||[];
+  updStats(); updInds(); updDashF(); updSBBadges(); chkLicAlerts();
+}
+setInterval(loadAll,30000);
+
+// STATS
+function updStats(){
+  const tot=allE.length,ok=allE.filter(e=>e['الحالة']==='صالح').length;
+  const flt=allE.filter(e=>e['الحالة']==='عاطل').length;
+  const rep=allE.filter(e=>['قيد الإصلاح','تم طلب سلفة','تم إصدار سلفة'].includes(e['الحالة'])).length;
+  const res=allF.filter(f=>f['الحالة']==='تم الإصلاح').length;
+  [['ws1',tot],['ws2',ok],['ws3',flt],['sc1',tot],['sc2',ok],['sc3',flt],['sc4',rep],['sc5',res]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+  if(document.getElementById('page-vehicles').classList.contains('active')) renderV(allE);
+}
+function updSBBadges(){
+  const ac=allF.filter(f=>f['الحالة']==='جاري').length;
+  const rc=allF.filter(f=>f['الحالة']==='قيد الإصلاح').length;
+  const lc=allF.filter(f=>f['تم طلب سلفة']==='نعم'&&f['الحالة']!=='تم الإصلاح').length;
+  ['sb-ac','sb-rc','sb-lc'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[ac,rc,lc][i];});
+  const qcf=document.getElementById('qcf');
+  if(qcf){qcf.textContent=ac;qcf.classList.toggle('show',ac>0);}
+}
+  <script src="api.js"></script>
+</body>
+</html>
