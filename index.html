@@ -343,24 +343,24 @@ body{font-family:'Cairo',sans-serif;background:var(--g0);color:var(--g8);directi
       <div class="sblbl">الرئيسية</div>
       <div class="sbi active" onclick="go('dashboard',this)"><span class="ic">🏠</span> لوحة التحكم</div>
       <div class="sblbl">السيارات والمعدات</div>
-      <div class="sbi" onclick="go('vehicles',this)"><span class="ic">🚛</span> السيارات والمعدات</div>
-      <div class="sbi" onclick="go('card',this)"><span class="ic">📋</span> بطاقة المعدات</div>
+      <div class="sbi" onclick="location.href='vehicles.html'"><span class="ic">🚛</span> السيارات والمعدات</div>
+      <div class="sbi" onclick="location.href='vehicles.html'"><span class="ic">📋</span> بطاقة المعدات</div>
       <div class="sblbl">بيانات الحملة</div>
       <div class="sbi" onclick="toggleSub('sub-h',this,'ha')"><span class="ic">📊</span> بيانات الحملة <span style="margin-right:auto;font-size:10px;opacity:.5" id="ha">▼</span></div>
       <div class="sbsub" id="sub-h">
-        <div class="sbi" onclick="go('technical',this)"><span class="ic">🔧</span> الحالة الفنية والمعدات</div>
-        <div class="sbi" onclick="go('drivers',this)"><span class="ic">👨‍✈️</span> سائقي القطاع</div>
+        <div class="sbi" onclick="location.href='vehicles.html'"><span class="ic">🔧</span> الحالة الفنية والمعدات</div>
+        <div class="sbi" onclick="location.href='admin.html'"><span class="ic">👨‍✈️</span> سائقي القطاع</div>
       </div>
       <div class="sblbl">الأعطال والصيانة</div>
-      <div class="sbi" onclick="go('reportFault',this)"><span class="ic">⚠️</span> إبلاغ عن عطل</div>
-      <div class="sbi" onclick="go('activeFaults',this)"><span class="ic">🔴</span> عطل قائم <span class="sbbg" id="sb-ac">0</span></div>
-      <div class="sbi" onclick="go('inRepair',this)"><span class="ic">🛠️</span> قيد الإصلاح <span class="sbbg w" id="sb-rc">0</span></div>
-      <div class="sbi" onclick="go('resolvedFaults',this)"><span class="ic">✅</span> تم الإصلاح</div>
+      <div class="sbi" onclick="location.href='faults.html'"><span class="ic">⚠️</span> إبلاغ عن عطل</div>
+      <div class="sbi" onclick="location.href='faults.html'"><span class="ic">🔴</span> عطل قائم <span class="sbbg" id="sb-ac">0</span></div>
+      <div class="sbi" onclick="location.href='faults.html'"><span class="ic">🛠️</span> قيد الإصلاح <span class="sbbg w" id="sb-rc">0</span></div>
+      <div class="sbi" onclick="location.href='faults.html'"><span class="ic">✅</span> تم الإصلاح</div>
       <div class="sblbl">السلف</div>
-      <div class="sbi" onclick="go('loans',this)"><span class="ic">💰</span> السلف <span class="sbbg w" id="sb-lc">0</span></div>
+      <div class="sbi" onclick="location.href='faults.html'"><span class="ic">💰</span> السلف <span class="sbbg w" id="sb-lc">0</span></div>
       <div class="sblbl">الإدارة</div>
-      <div class="sbi" onclick="go('users',this)"><span class="ic">👥</span> المستخدمون</div>
-      <div class="sbi" onclick="go('regions',this)"><span class="ic">📍</span> المناطق</div>
+      <div class="sbi" onclick="location.href='admin.html'"><span class="ic">👥</span> المستخدمون</div>
+      <div class="sbi" onclick="location.href='admin.html'"><span class="ic">📍</span> المناطق</div>
     </nav>
     <div class="sbf">
       <div class="uc" onclick="toggleUM(event)">
@@ -368,7 +368,7 @@ body{font-family:'Cairo',sans-serif;background:var(--g0);color:var(--g8);directi
         <div class="uinf"><h4 id="sb-un">مدير الحملة</h4><span>Super Admin</span></div>
         <span style="color:rgba(255,255,255,.35);margin-right:auto">⋯</span>
         <div class="umenu" id="um">
-          <div class="umi" onclick="go('profile',null)">👤 الملف الشخصي</div>
+          <div class="umi" onclick="location.href='admin.html'">👤 الملف الشخصي</div>
           <div class="umi red" onclick="logout()">🚪 خروج</div>
         </div>
       </div>
