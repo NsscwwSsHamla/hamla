@@ -696,8 +696,10 @@ function chkLicAlerts(){
     if(!e['الترخيص حتى']) return;
     const parts=e['الترخيص حتى'].toString().split('/');
     if(parts.length<3) return;
-    const mMap={'يناير':0,'فبراير':1,'مارس':2,'أبريل':3,'مايو':4,'يونيو':5,'يوليو':6,'أغسطس':7,'سبتمبر':8,'أكتوبر':9,'نوفمبر':10,'ديسمبر':11};
-    const mNum=mMap[parts[1]];
-  <script src="api.js"></script>
+    const mMap={'1':'يناير','2':'فبراير','3':'مارس','4':'أبريل','5':'مايو','6':'يونيو','7':'يوليو','8':'أغسطس','9':'سبتمبر','10':'أكتوبر','11':'نوفمبر','12':'ديسمبر'};
+        const mNum=mMap[parts[1]];
+    </script>
+<script src="api.js"></script>
+<script>loadAll();</script>
 </body>
 </html>
