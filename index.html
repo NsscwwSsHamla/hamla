@@ -416,12 +416,12 @@ body{font-family:'Cairo',sans-serif;background:var(--g0);color:var(--g8);directi
             <div class="di red" onclick="sB(event);openSM('delete')">🗑️ حذف</div>
           </div>
         </div>
-        <div class="qb" onclick="go('card',null)"><div class="qi">📋</div><span class="ql">بطاقة المعدات</span></div>
-        <div class="qb" onclick="go('reportFault',null)">
+        <div class="qb" onclick="location.href='vehicles.html'"><div class="qi">📋</div><span class="ql">بطاقة المعدات</span></div>
+        <div class="qb" onclick="location.href='faults.html'">
           <div class="qi">⚠️</div><span class="ql">إبلاغ عطل</span>
           <div class="qcnt" id="qcf">0</div>
         </div>
-        <div class="qb" onclick="go('activeFaults',null)"><div class="qi">🔴</div><span class="ql">عطل قائم</span></div>
+        <div class="qb" onclick="location.href='faults.html'"><div class="qi">🔴</div><span class="ql">عطل قائم</span></div>
       </div>
 
       <div class="scg">
@@ -429,7 +429,7 @@ body{font-family:'Cairo',sans-serif;background:var(--g0);color:var(--g8);directi
         <div class="scc gr" onclick="fAndGo('صالح')"><div class="sci">✅</div><h3 id="sc2">-</h3><p>صالحة وجاهزة</p></div>
         <div class="scc rd" onclick="fAndGo('عاطل')"><div class="sci">🔴</div><h3 id="sc3">-</h3><p>عاطلة</p></div>
         <div class="scc yw" onclick="fAndGo('قيد الإصلاح')"><div class="sci">🛠️</div><h3 id="sc4">-</h3><p>قيد الإصلاح / سلفة</p></div>
-        <div class="scc tl" onclick="go('resolvedFaults',null)"><div class="sci">🔵</div><h3 id="sc5">-</h3><p>تم إصلاحها مؤخراً</p></div>
+        <div class="scc tl" onclick="location.href='faults.html'"><div class="sci">🔵</div><h3 id="sc5">-</h3><p>تم إصلاحها مؤخراً</p></div>
       </div>
 
       <div class="indsec">
@@ -440,7 +440,7 @@ body{font-family:'Cairo',sans-serif;background:var(--g0);color:var(--g8);directi
       <div class="dg">
         <div>
           <div class="card">
-            <div class="ch"><div class="ct"><span class="cdot"></span> آخر الأعطال</div><div class="ca" onclick="go('activeFaults',null)">الكل</div></div>
+            <div class="ch"><div class="ct"><span class="cdot"></span> آخر الأعطال</div><div class="ca" onclick="location.href='faults.html'">الكل</div></div>
             <table class="tbl"><thead><tr><th>#</th><th>العربية</th><th>المنطقة</th><th>العطل</th><th>الحالة</th><th>التاريخ</th></tr></thead>
             <tbody id="dft"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--g6)">جاري التحميل...</td></tr></tbody></table>
           </div>
