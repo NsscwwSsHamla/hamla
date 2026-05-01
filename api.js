@@ -1005,3 +1005,994 @@ function go(name,el){
 </script>
 </body>
 </html>
+window.onload=function(){
+  const src="data:image/jpeg;base64,"+LOGO;
+  document.getElementById('spl').src=src;
+  document.getElementById('sbi').src=src;
+
+  const n=new Date();
+  const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const mths=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('dtb').textContent='📅 '+days[n.getDay()]+'، '+n.getDate()+' '+mths[n.getMonth()]+' '+n.getFullYear();
+
+  fillYrs(); fillLicD(); fillRgns(); loadCOpts();
+
+  setTimeout(()=>{
+    const nz=document.getElementById('naz');
+    nz.classList.add('show');
+    setTimeout(()=>{
+      document.getElementById('splash').classList.add('hide');
+      setTimeout(()=>{document.getElementById('app').classList.add('show');loadAll();},900);
+    },1800);
+  },2600);
+};
+
+function fillYrs(){
+  const s=document.getElementById('yrS');
+  s.innerHTML='<option value="">-- السنة --</option>';
+  for(let y=2026;y>=1980;y--) s.innerHTML+=`<option>${y}</option>`;
+  const ly=document.getElementById('ly');
+  ly.innerHTML='<option value="">سنة</option>';
+  for(let y=2024;y<=2035;y++) ly.innerHTML+=`<option>${y}</option>`;
+}
+function fillLicD(){
+  const d=document.getElementById('ld');
+  d.innerHTML='<option value="">يوم</option>';
+  for(let i=1;i<=31;i++) d.innerHTML+=`<option>${i}</option>`;
+}
+function fillRgns(){
+  // Fill all selects
+  document.querySelectorAll('select[id="eq-r"],select[id="vfr"],select[id="cfr"],select[id="tfr"],select[id="rfr"],select[id="afr"],select[id="irr"],select[id="resr"],select[id="lr"],select[id="drr"],select[id="drm"]').forEach(sel=>{
+    const cur=sel.innerHTML;
+    RGNS.forEach(r=>{
+      if(!sel.querySelector(`option[value="${r}"]`)){
+        sel.innerHTML+=`<option value="${r}">${r}</option>`;
+      }
+    });
+  });
+  // Build sidebar region lists
+  buildRgnLists();
+  // User regions checkboxes
+  const urgns=document.getElementById('urgns');
+  if(urgns) urgns.innerHTML=RGNS.map(r=>`<div class="cki"><input type="checkbox" id="ur-${r}" value="${r}"><label for="ur-${r}">${r}</label></div>`).join('');
+  // Select modal regions
+  document.getElementById('rls').innerHTML=RGNS.map(r=>`
+    <div class="ri" onclick="selRgn('${r}')">
+      <div class="ric">${RICONS[r]||'📍'}</div><div class="rn">${r}</div>
+    </div>`).join('');
+}
+function buildRgnLists(){
+  ['cr','tr2','rr2','dr'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const mode=id==='cr'?'card':id==='tr2'?'tech':id==='rr2'?'fault':'dash';
+    el.innerHTML=RGNS.filter(r=>r!=='القطاع').map(r=>`
+      <div class="ri" onclick="rgnClick('${r}','${mode}')">
+        <div class="ric">${RICONS[r]||'📍'}</div>
+        <div class="rn">${r}</div>
+        <div class="rct" id="rc-${mode}-${r.replace(/ /g,'_')}">-</div>
+      </div>`).join('');
+  });
+}
+function loadCOpts(){
+  loadLS('cTypes','typeS');
+  loadLS('cWaz','wazS');
+}
+function loadLS(key,selId){
+  const sel=document.getElementById(selId);if(!sel)return;
+  const items=JSON.parse(localStorage.getItem(key)||'[]');
+  const oth=sel.querySelector('option[value="other"]');
+  items.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.insertBefore(o,oth);});
+}
+
+// LOAD ALL
+async function loadAll(){
+  const [er,fr]=await Promise.all([api({action:'getEquip',region:'all'}),api({action:'getFaults',region:'all'})]);
+  if(er.status==='ok') allE=er.data||[];
+  if(fr.status==='ok') allF=fr.data||[];
+  updStats(); updInds(); updDashF(); updSBBadges(); chkLicAlerts();
+}
+setInterval(loadAll,30000);
+
+// STATS
+function updStats(){
+  const tot=allE.length,ok=allE.filter(e=>e['الحالة']==='صالح').length;
+  const flt=allE.filter(e=>e['الحالة']==='عاطل').length;
+  const rep=allE.filter(e=>['قيد الإصلاح','تم طلب سلفة','تم إصدار سلفة'].includes(e['الحالة'])).length;
+  const res=allF.filter(f=>f['الحالة']==='تم الإصلاح').length;
+  [['ws1',tot],['ws2',ok],['ws3',flt],['sc1',tot],['sc2',ok],['sc3',flt],['sc4',rep],['sc5',res]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+  if(document.getElementById('page-vehicles').classList.contains('active')) renderV(allE);
+}
+function updSBBadges(){
+  const ac=allF.filter(f=>f['الحالة']==='جاري').length;
+  const rc=allF.filter(f=>f['الحالة']==='قيد الإصلاح').length;
+  const lc=allF.filter(f=>f['تم طلب سلفة']==='نعم'&&f['الحالة']!=='تم الإصلاح').length;
+  ['sb-ac','sb-rc','sb-lc'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[ac,rc,lc][i];});
+  const qcf=document.getElementById('qcf');
+  if(qcf){qcf.textContent=ac;qcf.classList.toggle('show',ac>0);}
+}
+function updInds(){
+  const grid=document.getElementById('ig');if(!grid)return;
+  const data=RGNS.filter(r=>r!=='القطاع').map(r=>{
+    const tot=allE.filter(e=>e['المنطقة']===r).length;
+    const ok=allE.filter(e=>e['المنطقة']===r&&e['الحالة']==='صالح').length;
+    return{r,tot,ok,p:tot?Math.round(ok/tot*100):0};
+  }).filter(x=>x.tot>0);
+  if(!data.length){grid.innerHTML='<div style="text-align:center;padding:20px;color:var(--g6)">أضف معدات لعرض المؤشرات</div>';return;}
+  grid.innerHTML=data.map(x=>{
+    const cls=x.p<60?'r':x.p<=75?'y':x.p<=80?'g':'b';
+    const clr=x.p<60?'#ef4444':x.p<=75?'#f59e0b':x.p<=80?'#10b981':'#3b82f6';
+    return`<div class="indc"><div class="indn"><span>${x.r}</span><span style="color:${clr};font-weight:800">${x.p}%</span></div><div class="indbar"><div class="indf ${cls}" style="width:${x.p}%"></div></div><div style="font-size:10px;color:var(--g6);margin-top:3px">${x.ok} صالح من ${x.tot}</div></div>`;
+  }).join('');
+  // Update region counts
+  data.forEach(x=>{
+    ['card','tech','fault','dash'].forEach(m=>{
+      const el=document.getElementById(`rc-${m}-${x.r.replace(/ /g,'_')}`);
+      if(el) el.textContent=x.tot;
+    });
+  });
+}
+function updDashF(){
+  const tb=document.getElementById('dft');if(!tb)return;
+  const recent=[...allF].reverse().slice(0,5);
+  if(!recent.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--g6)">لا توجد أعطال مسجلة</td></tr>';return;}
+  tb.innerHTML=recent.map((f,i)=>`<tr onclick="openAFDetail('${f['ID']}')">
+    <td>${i+1}</td><td style="font-weight:700">${f['اللوحة']||'-'}</td><td>${f['المنطقة']||'-'}</td>
+    <td>${f['اسم العطل']||(f['تفاصيل العطل']||'').substring(0,20)||'-'}</td>
+    <td>${sBdg(f['الحالة'])}</td><td style="font-size:11px">${f['تاريخ الابلاغ']||'-'}</td>
+  </tr>`).join('');
+  // Update dash regions
+  const dr=document.getElementById('dr');
+  if(dr){
+    const byR={};
+    allE.forEach(e=>{if(!byR[e['المنطقة']])byR[e['المنطقة']]=0;byR[e['المنطقة']]++;});
+    dr.innerHTML=RGNS.filter(r=>r!=='القطاع'&&byR[r]).map(r=>`
+      <div class="ri" onclick="rgnClick('${r}','dash')">
+        <div class="ric">${RICONS[r]||'📍'}</div><div class="rn">${r}</div><div class="rct">${byR[r]||0}</div>
+      </div>`).join('');
+  }
+}
+function chkLicAlerts(){
+  const today=new Date();
+  allE.forEach(e=>{
+    if(!e['الترخيص حتى']) return;
+    const parts=e['الترخيص حتى'].toString().split('/');
+    if(parts.length<3) return;
+    const mMap={'يناير':0,'فبراير':1,'مارس':2,'أبريل':3,'مايو':4,'يونيو':5,'يوليو':6,'أغسطس':7,'سبتمبر':8,'أكتوبر':9,'نوفمبر':10,'ديسمبر':11};
+    const mNum=mMap[parts[1]];
+    if(mNum===undefined) return;
+    const ld=new Date(parseInt(parts[2]),mNum,parseInt(parts[0]));
+    const diff=(ld-today)/(86400000);
+    if(diff>0&&diff<=30) addNotif('wrn','تنبيه ترخيص',`ترخيص ${getPlate(e)} ينتهي خلال ${Math.round(diff)} يوم`);
+  });
+}
+
+// PAGES
+const pgTitles={dashboard:'لوحة التحكم',vehicles:'السيارات والمعدات',card:'بطاقة المعدات',technical:'الحالة الفنية والمعدات',reportFault:'إبلاغ عن عطل',activeFaults:'عطل قائم',inRepair:'قيد الإصلاح',resolvedFaults:'تم الإصلاح',loans:'السلف',drivers:'سائقي القطاع',users:'المستخدمون',regions:'المناطق',profile:'الملف الشخصي'};
+function go(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  if(el){document.querySelectorAll('.sbi').forEach(i=>i.classList.remove('active'));el.classList.add('active');}
+  document.getElementById('pt').textContent=pgTitles[name]||name;
+  document.getElementById('pb').textContent='الرئيسية › '+(pgTitles[name]||name);
+  if(name==='vehicles') renderV(allE);
+  if(name==='activeFaults') loadAF();
+  if(name==='inRepair') loadIR();
+  if(name==='resolvedFaults') loadRes();
+  if(name==='loans') loadLoans();
+  if(name==='drivers'){loadDrivers();loadDriverSelects();}
+  if(name==='users') loadUsersPage();
+  if(name==='regions') loadRegionsPage();
+}
+function toggleSub(id,el,arrowId){
+  const s=document.getElementById(id);s.classList.toggle('open');
+  document.getElementById(arrowId).textContent=s.classList.contains('open')?'▲':'▼';
+}
+function fAndGo(st){
+  go('vehicles',null);
+  if(st!=='all'){const el=document.getElementById('vfs');if(el){el.value=st;fV();}}
+  else cF();
+}
+
+// PLATE
+function getPlate(e){
+  const c=[(e['حرف1']||''),(e['حرف2']||''),(e['حرف3']||'')].filter(x=>x).join('');
+  const n=[(e['رقم1']||''),(e['رقم2']||''),(e['رقم3']||''),(e['رقم4']||'')].filter(x=>x).join(' ');
+  return(c+(c&&n?' ':'')+n).trim()||'بدون لوحة';
+}
+function pNext(inp,idx,type){
+  if(!inp.value)return;
+  const all=[...document.querySelectorAll(type==='chars'?'.pc':'.pn')];
+  if(all[idx+1]) all[idx+1].focus();
+}
+
+// STATUS BADGE
+function sBdg(s){
+  const m={'صالح':'ok','عاطل':'bad','قيد الإصلاح':'warn','تم طلب سلفة':'pur','تم إصدار سلفة':'pur','جاري':'warn','تم الإصلاح':'tl'};
+  return`<span class="bdg ${m[s]||'warn'}">${s||'-'}</span>`;
+}
+function onSC(r){document.getElementById('bdb').style.display=r.value==='عاطل'?'block':'none';}
+function tD(id,v){const el=document.getElementById(id);if(el)el.style.display=v==='سارية'?'':'none';}
+function tSec(id,show){const el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+
+// VEHICLES TABLE
+const clsOrd=['مياه','صرف','ركوب','معدات','دراجات نارية'];
+function renderV(data){
+  const tb=document.getElementById('vb');
+  const vc=document.getElementById('vc');
+  if(!data.length){
+    tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--g6)">لا توجد معدات مسجلة بعد</td></tr>';
+    if(vc)vc.textContent='الإجمالي: 0';return;
+  }
+  const sorted=[...data].sort((a,b)=>{
+    const ai=clsOrd.indexOf(a['التصنيف']);const bi=clsOrd.indexOf(b['التصنيف']);
+    return(ai===-1?99:ai)-(bi===-1?99:bi);
+  });
+  tb.innerHTML=sorted.map((e,i)=>`<tr onclick="openVD('${e['ID']}')" style="cursor:pointer">
+    <td>${i+1}</td>
+    <td style="font-weight:900;font-size:13px">${getPlate(e)}</td>
+    <td>${e['الماركة']||'-'}</td>
+    <td style="font-size:11px">${e['الوظيفة']||'-'}</td>
+    <td>${e['المنطقة']||'-'}</td>
+    <td>${e['التصنيف']||'-'}</td>
+    <td>${sBdg(e['الحالة'])}</td>
+    <td><span class="bdg ${e['الترخيص']==='منتهي'?'bad':e['الترخيص']==='سارية'?'ok':'warn'}">${e['الترخيص']||'-'}</span></td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap">
+      <button class="btn bs bsm" onclick="openVD('${e['ID']}')">👁️</button>
+      <button class="btn bpr bsm" onclick="openPC('${e['ID']}')">📋</button>
+      <button class="btn bsm" style="background:var(--pll);color:var(--pr);border:none;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700" onclick="chgSt('${e['ID']}','${e['الحالة']}')">تغيير الحالة</button>
+    </td>
+  </tr>`).join('');
+  if(vc)vc.textContent=`الإجمالي: ${data.length} معدة`;
+}
+function fV(){
+  const r=document.getElementById('vfr').value;
+  const s=document.getElementById('vfs').value;
+  const c=document.getElementById('vfc').value;
+  const l=document.getElementById('vfl').value;
+  const q=document.getElementById('vfq').value.toLowerCase();
+  let d=allE;
+  if(r)d=d.filter(e=>e['المنطقة']===r);
+  if(s)d=d.filter(e=>e['الحالة']===s);
+  if(c)d=d.filter(e=>e['التصنيف']===c);
+  if(l)d=d.filter(e=>e['الترخيص']===l);
+  if(q)d=d.filter(e=>getPlate(e).toLowerCase().includes(q)||(e['الماركة']||'').toLowerCase().includes(q));
+  renderV(d);
+}
+function cF(){
+  ['vfr','vfs','vfc','vfl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('vfq').value='';
+  renderV(allE);
+}
+async function chgSt(id,cur){
+  const sts=['صالح','عاطل','قيد الإصلاح','تم طلب سلفة','تم إصدار سلفة'];
+  const ns=prompt('الحالة الحالية: '+cur+'\nأدخل الحالة الجديدة:\n'+sts.join(' / '));
+  if(!ns||!sts.includes(ns))return;
+  const res=await api({action:'editEquip',id,status:ns,editedBy:'admin'});
+  if(res.status==='ok'){
+    if(ns==='عاطل'){addNotif('red','عطل من السيارات والمعدات','الإبلاغ لم يكتمل — تحتاج إدخال تفاصيل');document.getElementById('qcf').classList.add('show');}
+    await loadAll();
+  }else alert('❌ '+res.message);
+}
+
+// VEHICLE DETAIL
+function openVD(id){
+  const e=allE.find(x=>x['ID']===id);if(!e)return;
+  curFE=e;
+  const pl=getPlate(e);
+  document.getElementById('vdT').textContent='🔧 '+pl+' — '+(e['الماركة']||'');
+  document.getElementById('vdb').innerHTML=`
+    <div class="pcg" style="gap:8px">
+      <div class="pcf"><label>اللوحة</label><span style="font-size:15px;font-weight:900">${pl}</span></div>
+      <div class="pcf"><label>الماركة / النوع</label><span>${e['الماركة']||'-'}</span></div>
+      <div class="pcf"><label>المنطقة</label><span>${e['المنطقة']||'-'}</span></div>
+      <div class="pcf"><label>التصنيف</label><span>${e['التصنيف']||'-'}</span></div>
+      <div class="pcf"><label>الوظيفة</label><span>${e['الوظيفة']||'-'}</span></div>
+      <div class="pcf"><label>الحالة الفنية</label><span>${sBdg(e['الحالة'])}</span></div>
+      <div class="pcf"><label>سنة الصنع</label><span>${e['سنة الصنع']||'-'}</span></div>
+      <div class="pcf"><label>السائق</label><span>${e['السائق']||'-'}</span></div>
+      <div class="pcf"><label>رقم الشاسيه</label><span>${e['الشاسيه']||'-'}</span></div>
+      <div class="pcf"><label>رقم الموتور</label><span>${e['الموتور']||'-'}</span></div>
+      <div class="pcf"><label>الترخيص</label><span>${e['الترخيص']||'-'} ${e['الترخيص حتى']?'حتى '+e['الترخيص حتى']:''}</span></div>
+      <div class="pcf"><label>عهدة على</label><span>${e['عهدة على']||'-'}</span></div>
+      <div class="pcf"><label>لزوجة الزيت</label><span>${e['لزوجة الزيت']||'-'}</span></div>
+      <div class="pcf"><label>مقاس الكاوتش</label><span>${e['مقاس الكاوتش']||'-'}</span></div>
+    </div>
+    ${e['ملاحظات']?`<div style="margin-top:12px;padding:10px;background:var(--g0);border-radius:8px"><label style="font-size:10px;font-weight:700;color:var(--g6)">ملاحظات</label><div style="font-size:13px;margin-top:4px">${e['ملاحظات']}</div></div>`:''}`;
+  openM('vdM');
+}
+function openFaultFromDetail(){closeM('vdM');if(curFE)openFltModal(curFE);}
+function editFromDetail(){
+  closeM('vdM');
+  if(curFE){
+    document.getElementById('aeT').textContent='✏️ تعديل: '+getPlate(curFE);
+    document.getElementById('addEquipM').dataset.editId=curFE['ID'];
+    openM('addEquipM');
+  }
+}
+
+// PRINT CARD
+function openPC(id){
+  const e=allE.find(x=>x['ID']===id)||{};
+  const pl=getPlate(e);
+  document.getElementById('pcb').innerHTML=`
+    <div class="pcard">
+      <div class="pch"><h2>بطاقة معدة — ${pl}</h2><div style="font-size:11px;color:var(--g6)">${e['المنطقة']||''} | ${new Date().toLocaleDateString('ar-EG')}</div></div>
+      <div class="pcg">
+        <div class="pcf"><label>اللوحة</label><span>${pl}</span></div>
+        <div class="pcf"><label>الماركة / النوع</label><span>${e['الماركة']||'-'}</span></div>
+        <div class="pcf"><label>المنطقة</label><span>${e['المنطقة']||'-'}</span></div>
+        <div class="pcf"><label>التصنيف</label><span>${e['التصنيف']||'-'}</span></div>
+        <div class="pcf"><label>الهيئة</label><span>${e['الهيئة']||'-'}</span></div>
+        <div class="pcf"><label>سنة الصنع</label><span>${e['سنة الصنع']||'-'}</span></div>
+        <div class="pcf"><label>الوظيفة المنوطة بها</label><span>${e['الوظيفة']||'-'}</span></div>
+        <div class="pcf"><label>الحالة الفنية</label><span>${e['الحالة']||'-'}</span></div>
+        <div class="pcf"><label>السائق / المشغل</label><span>${e['السائق']||'-'}</span></div>
+        <div class="pcf"><label>عهدة على</label><span>${e['عهدة على']||'-'}</span></div>
+        <div class="pcf"><label>رقم الشاسيه</label><span>${e['الشاسيه']||'-'}</span></div>
+        <div class="pcf"><label>رقم الموتور</label><span>${e['الموتور']||'-'}</span></div>
+        <div class="pcf"><label>الترخيص</label><span>${e['الترخيص']||'-'}</span></div>
+        <div class="pcf"><label>سارية حتى</label><span>${e['الترخيص حتى']||'-'}</span></div>
+        <div class="pcf"><label>لزوجة زيت المحرك</label><span>${e['لزوجة الزيت']||'-'}</span></div>
+        <div class="pcf"><label>كمية الزيت (لتر)</label><span>${e['كمية الزيت']||'-'}</span></div>
+        <div class="pcf"><label>فلتر الزيت</label><span>${e['فلتر الزيت']||'-'}</span></div>
+        <div class="pcf"><label>فلتر الجاز</label><span>${e['فلتر الجاز']||'-'}</span></div>
+        <div class="pcf"><label>فلتر الفاصل</label><span>${e['فلتر الفاصل']||'-'}</span></div>
+        <div class="pcf"><label>فلتر الهواء</label><span>${e['فلتر الهواء']||'-'}</span></div>
+        <div class="pcf"><label>مقاس الكاوتش</label><span>${e['مقاس الكاوتش']||'-'}</span></div>
+        <div class="pcf"><label>الوكيل</label><span>${e['الوكيل']||'-'}</span></div>
+      </div>
+      ${e['ملاحظات']?`<div style="margin-top:12px;padding:10px;border:1px solid #ddd;border-radius:6px"><label style="font-size:10px;font-weight:700;color:#666">ملاحظات</label><div style="font-size:12.5px;margin-top:4px">${e['ملاحظات']}</div></div>`:''}
+    </div>`;
+  openM('pcM');
+}
+
+// REGION CLICK
+function rgnClick(r,mode){
+  const equips=allE.filter(e=>e['المنطقة']===r);
+  showEqPick(equips,mode);
+}
+function showEqPick(equips,mode){
+  const ov=document.createElement('div');
+  ov.className='ov open';
+  ov.innerHTML=`<div class="modal sm">
+    <div class="mh"><h3>اختر العربية</h3><button class="mc" onclick="this.closest('.ov').remove()">✕</button></div>
+    <div style="padding:14px;max-height:65vh;overflow-y:auto">
+      ${!equips.length?'<div style="text-align:center;padding:20px;color:var(--g6)">لا توجد معدات في هذه المنطقة</div>':
+      equips.map(e=>`<div class="ri" onclick="this.closest('.ov').remove();hEqMode('${e['ID']}','${mode}')">
+        <div class="ric">🚛</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700">${getPlate(e)}</div><div style="font-size:11px;color:var(--g6)">${e['الماركة']||'-'}</div></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function hEqMode(id,mode){
+  const e=allE.find(x=>x['ID']===id);if(!e)return;
+  if(mode==='card') openPC(id);
+  else if(mode==='tech') openVD(id);
+  else if(mode==='fault') openFltModal(e);
+}
+function loadRgn(selId,mode){
+  const r=document.getElementById(selId).value;
+  if(!r){buildRgnLists();return;}
+  const equips=allE.filter(e=>e['المنطقة']===r);
+  const elId=mode==='card'?'cr':mode==='tech'?'tr2':'rr2';
+  const el=document.getElementById(elId);
+  if(!el)return;
+  el.innerHTML=equips.map(e=>`
+    <div class="ri" onclick="hEqMode('${e['ID']}','${mode}')">
+      <div class="ric">🚛</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:700">${getPlate(e)}</div><div style="font-size:11px;color:var(--g6)">${e['الماركة']||'-'} — ${sBdg(e['الحالة'])}</div></div>
+    </div>`).join('') || '<div style="text-align:center;padding:20px;color:var(--g6)">لا توجد معدات</div>';
+}
+
+// FAULT
+function openFltModal(eq){
+  curFE=eq;
+  const pl=getPlate(eq);
+  document.getElementById('fltT').textContent='⚠️ إبلاغ عن عطل — '+pl;
+  document.getElementById('fpl').textContent=pl;
+  document.getElementById('fty').textContent=(eq['الماركة']||'-')+' — '+(eq['الوظيفة']||'');
+  document.getElementById('fdt').value=new Date().toISOString().split('T')[0];
+  document.getElementById('fdt2').value='';
+  document.getElementById('fnm').value='';
+  openM('fltM');
+}
+async function saveFault(){
+  const nm=document.getElementById('fnm').value.trim();
+  const dt=document.getElementById('fdt2').value.trim();
+  if(!nm||!dt){alert('برجاء كتابة اسم مختصر وتفاصيل العطل');return;}
+  const btn=document.querySelector('#fltM .bp');
+  btn.textContent='⏳...';btn.disabled=true;
+  const res=await api({action:'addFault',equipId:curFE['ID']||'',region:curFE['المنطقة']||'',plate:getPlate(curFE),equipType:curFE['الماركة']||'',faultName:nm,details:dt,status:'جاري',reportedBy:'admin',faultDate:document.getElementById('fdt').value});
+  btn.textContent='💾 حفظ البلاغ';btn.disabled=false;
+  if(res.status==='ok'){addNotif('red','بلاغ عطل جديد',nm+' — '+getPlate(curFE));closeM('fltM');await loadAll();}
+  else alert('❌ '+res.message);
+}
+function printFaultRpt(){
+  const pl=document.getElementById('fpl').textContent;
+  const nm=document.getElementById('fnm').value;
+  const dt=document.getElementById('fdt2').value;
+  const d=document.getElementById('fdt').value;
+  const w=window.open('','_blank');
+  w.document.write(`<html dir="rtl"><head><meta charset="UTF-8"><title>بلاغ عطل</title><style>body{font-family:Arial;padding:30px;direction:rtl}h2{color:#1a5276}.f{margin:10px 0;padding:10px;border:1px solid #ddd;border-radius:6px}label{font-size:11px;color:#666;font-weight:bold;display:block}</style></head><body><h2>بلاغ عطل</h2><h3>شركة مياه الشرب والصرف الصحي — قطاع جنوب سيناء</h3><div class="f"><label>العربية</label>${pl}</div><div class="f"><label>اسم العطل</label>${nm}</div><div class="f"><label>تاريخ العطل</label>${d}</div><div class="f"><label>تفاصيل العطل</label>${dt}</div><div class="f"><label>تاريخ الطباعة</label>${new Date().toLocaleDateString('ar-EG')}</div><script>window.print();<\/script></body></html>`);
+}
+
+// ACTIVE FAULTS
+async function loadAF(){
+  const r=document.getElementById('afr').value;
+  const el=document.getElementById('afc');
+  const data=allF.filter(f=>f['الحالة']==='جاري'&&(!r||f['المنطقة']===r));
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--g6)">لا توجد أعطال جارية</div>';return;}
+  el.innerHTML=data.map(f=>`
+    <div class="fi on" onclick="openAFDetail('${f['ID']}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4>${f['اسم العطل']||(f['تفاصيل العطل']||'').substring(0,30)||'-'}</h4>
+        ${sBdg(f['الحالة'])}
+      </div>
+      <p><span>🚛 ${f['اللوحة']||'-'}</span><span>📍 ${f['المنطقة']||'-'}</span><span>📅 ${f['تاريخ الابلاغ']||'-'}</span></p>
+      ${f['تم طلب سلفة']==='نعم'?`<p style="color:var(--wn);font-weight:700">💰 تم طلب سلفة — ${f['اسم صاحب السلفة']||''}</p>`:''}
+    </div>`).join('');
+}
+async function loadIR(){
+  const r=document.getElementById('irr').value;
+  const el=document.getElementById('irc');
+  const data=allF.filter(f=>f['الحالة']==='قيد الإصلاح'&&(!r||f['المنطقة']===r));
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--g6)">لا توجد أعطال قيد الإصلاح</div>';return;}
+  el.innerHTML=data.map(f=>`
+    <div class="fi" onclick="openAFDetail('${f['ID']}')">
+      <h4>${f['اسم العطل']||'-'}</h4>
+      <p><span>🚛 ${f['اللوحة']||'-'}</span><span>📍 ${f['المنطقة']||'-'}</span></p>
+    </div>`).join('');
+}
+async function loadRes(){
+  const r=document.getElementById('resr').value;
+  const el=document.getElementById('resc');
+  const data=allF.filter(f=>f['الحالة']==='تم الإصلاح'&&(!r||f['المنطقة']===r));
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--g6)">لا توجد أعطال تم إصلاحها</div>';return;}
+  const byPl={};
+  data.forEach(f=>{if(!byPl[f['اللوحة']])byPl[f['اللوحة']]=[];byPl[f['اللوحة']].push(f);});
+  el.innerHTML=Object.keys(byPl).map(pl=>`
+    <div class="ri" onclick="showFltHist('${pl}')">
+      <div class="ric">🚛</div><div class="rn">${pl}</div><div class="rct">${byPl[pl].length} عطل</div>
+    </div>`).join('');
+}
+function showFltHist(pl){
+  const faults=allF.filter(f=>f['اللوحة']===pl);
+  const ov=document.createElement('div');ov.className='ov open';
+  ov.innerHTML=`<div class="modal md">
+    <div class="mh"><h3>📋 سجل أعطال: ${pl}</h3><button class="mc" onclick="this.closest('.ov').remove()">✕</button></div>
+    <div class="mb" style="max-height:65vh;overflow-y:auto">
+      ${[...faults].sort((a,b)=>new Date(b['تاريخ الابلاغ'])-new Date(a['تاريخ الابلاغ'])).map(f=>`
+        <div class="fi ${f['الحالة']==='تم الإصلاح'?'res':'on'}" style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between"><h4>${f['اسم العطل']||'-'}</h4>${sBdg(f['الحالة'])}</div>
+          <p><span>📅 ${f['تاريخ الابلاغ']||'-'}</span><span>👤 ${f['ابلغ بواسطة']||'-'}</span></p>
+          <p style="margin-top:4px;color:var(--g8)">${f['تفاصيل العطل']||''}</p>
+          ${f['اسم صاحب السلفة']?`<p style="color:var(--wn)">💰 ${f['اسم صاحب السلفة']} — ${f['مبلغ السلفة']||'-'} جنيه</p>`:''}
+          ${f['عدل بواسطة']?`<div class="elog">عدل: ${f['عدل بواسطة']} — ${f['اخر تعديل']||''}</div>`:''}
+        </div>`).join('')}
+    </div>
+    <div class="mf"><div style="flex:1"></div><button class="btn bs" onclick="this.closest('.ov').remove()">إغلاق</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function openAFDetail(id){
+  const f=allF.find(x=>x['ID']===id);if(!f)return;
+  curF=f;
+  document.getElementById('afT').textContent='🛠️ '+(f['اسم العطل']||'تفاصيل العطل')+' — '+f['اللوحة'];
+  document.getElementById('afb').innerHTML=`
+    <div class="pcg" style="gap:8px;margin-bottom:14px">
+      <div class="pcf"><label>العربية</label><span style="font-weight:900">${f['اللوحة']||'-'}</span></div>
+      <div class="pcf"><label>المنطقة</label><span>${f['المنطقة']||'-'}</span></div>
+      <div class="pcf"><label>تاريخ الإبلاغ</label><span>${f['تاريخ الابلاغ']||'-'}</span></div>
+      <div class="pcf"><label>أبلغ بواسطة</label><span>${f['ابلغ بواسطة']||'-'}</span></div>
+    </div>
+    <div style="background:var(--wl);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px">${f['تفاصيل العطل']||'-'}</div>
+    <div class="fgrid c2" style="gap:10px">
+      <div class="fg"><label>الحالة</label>
+        <select id="af-st"><option ${f['الحالة']==='جاري'?'selected':''}>جاري</option><option ${f['الحالة']==='قيد الإصلاح'?'selected':''}>قيد الإصلاح</option><option ${f['الحالة']==='تم الإصلاح'?'selected':''}>تم الإصلاح</option></select>
+      </div>
+      <div class="fg"><label>تم طلب سلفة؟</label>
+        <select id="af-ln"><option ${f['تم طلب سلفة']!=='نعم'?'selected':''} value="لا">لا</option><option ${f['تم طلب سلفة']==='نعم'?'selected':''} value="نعم">نعم</option></select>
+      </div>
+      <div class="fg"><label>اسم صاحب السلفة</label><input type="text" id="af-lnm" value="${f['اسم صاحب السلفة']||''}"></div>
+      <div class="fg"><label>مبلغ السلفة (جنيه)</label><input type="number" id="af-lam" value="${f['مبلغ السلفة']||''}"></div>
+      <div class="fg"><label>تاريخ إصدار السلفة</label><input type="date" id="af-ldt" value="${f['تاريخ السلفة']||''}"></div>
+      <div class="fg"><label>📎 ملف السلفة PDF</label><input type="file" id="af-pdf" accept=".pdf"></div>
+      <div class="fg s2"><label>ملاحظات الإصلاح</label><textarea id="af-nt">${f['ملاحظات الاصلاح']||''}</textarea></div>
+      <div class="fg s2"><label>📷 صور العطل</label><input type="file" id="af-ph" accept="image/*" multiple></div>
+    </div>
+    ${f['اخر تعديل']?`<div class="elog" style="margin-top:10px">آخر تعديل: ${f['اخر تعديل']} — بواسطة: ${f['عدل بواسطة']||'-'}</div>`:''}`;
+  openM('afM');
+}
+async function saveAFEdit(){
+  if(!curF)return;
+  const btn=document.querySelector('#afM .bp');
+  btn.textContent='⏳...';btn.disabled=true;
+  const res=await api({action:'editFault',id:curF['ID'],status:document.getElementById('af-st').value,loanRequested:document.getElementById('af-ln').value,loanName:document.getElementById('af-lnm').value,loanAmount:document.getElementById('af-lam').value,loanDate:document.getElementById('af-ldt').value,repairNotes:document.getElementById('af-nt').value,editedBy:'admin'});
+  btn.textContent='💾 حفظ التعديلات';btn.disabled=false;
+  if(res.status==='ok'){addNotif('grn','تم تعديل العطل',curF['اسم العطل']||'');closeM('afM');await loadAll();}
+  else alert('❌ '+res.message);
+}
+async function markRes(){
+  if(!curF||!confirm('تأكيد إغلاق العطل وتحويله لتم الإصلاح؟'))return;
+  const res=await api({action:'editFault',id:curF['ID'],status:'تم الإصلاح',editedBy:'admin'});
+  if(res.status==='ok'){addNotif('grn','تم إصلاح العطل',curF['اسم العطل']||'');closeM('afM');await loadAll();}
+}
+
+// LOANS
+async function loadLoans(){
+  const el=document.getElementById('lc');
+  const loans=allF.filter(f=>f['تم طلب سلفة']==='نعم');
+  if(!loans.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--g6)">لا توجد سلف</div>';return;}
+  el.innerHTML=loans.map(f=>{
+    const ld=f['تاريخ السلفة']?new Date(f['تاريخ السلفة']):null;
+    const dy=ld?30-Math.floor((new Date()-ld)/86400000):null;
+    const st=f['الحالة']==='تم الإصلاح'?'منتهية':dy!==null&&dy>0?'جارية':'مطلوبة';
+    return`<div class="fi ${st==='منتهية'?'res':'on'}" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between"><h4>${f['اسم العطل']||'-'} — ${f['اللوحة']||'-'}</h4><span class="bdg ${st==='منتهية'?'tl':st==='جارية'?'warn':'pur'}">${st}</span></div>
+      <p><span>👤 ${f['اسم صاحب السلفة']||'-'}</span><span>💰 ${f['مبلغ السلفة']||'-'} جنيه</span><span>📅 ${f['تاريخ السلفة']||'-'}</span></p>
+      ${dy!==null&&st==='جارية'?`<p style="color:${dy<=5?'#c0392b':'#d68910'};font-weight:700">⏰ متبقي ${dy} يوم</p>`:''}
+      ${st!=='منتهية'?`<button class="btn bok bsm" style="margin-top:8px" onclick="settleLoan('${f['ID']}')">✅ تم تسوية السلفة</button>`:''}
+    </div>`;
+  }).join('');
+}
+async function settleLoan(id){
+  if(!confirm('هل أنت متأكد من إنهاء السلفة الجارية؟'))return;
+  const res=await api({action:'editFault',id,loanRequested:'تمت التسوية',editedBy:'admin'});
+  if(res.status==='ok'){addNotif('grn','تمت تسوية السلفة','');await loadAll();loadLoans();}
+}
+
+// SAVE EQUIP
+async function saveEquip(){
+  const btn=document.getElementById('aeBtn');
+  const editId=document.getElementById('addEquipM').dataset.editId;
+  btn.textContent='⏳ جاري الحفظ...';btn.disabled=true;
+  const params={
+    action:editId?'editEquip':'addEquip',id:editId||'',
+    region:document.getElementById('eq-r').value,
+    classification:document.getElementById('eq-c').value,
+    body:document.getElementById('eq-b').value,
+    char1:document.getElementById('pc1').value,
+    char2:document.getElementById('pc2').value,
+    char3:document.getElementById('pc3').value,
+    num1:document.getElementById('pn1').value,
+    num2:document.getElementById('pn2').value,
+    num3:document.getElementById('pn3').value,
+    num4:document.getElementById('pn4').value,
+    brand:document.getElementById('typeS').value,
+    year:document.getElementById('yrS').value,
+    chassis:document.getElementById('eq-ch').value,
+    motor:document.getElementById('eq-mo').value,
+    job:document.getElementById('wazS').value,
+    status:document.querySelector('input[name=st]:checked').value,
+    faultDate:document.getElementById('eq-fd').value,
+    licStatus:document.getElementById('licS').value,
+    licUntil:document.getElementById('ld').value+'/'+document.getElementById('lm').value+'/'+document.getElementById('ly').value,
+    driver:document.getElementById('eq-d1').value+' / '+document.getElementById('eq-d2').value+' / '+document.getElementById('eq-d3').value,
+    agent:document.getElementById('eq-ag').value,
+    receiveDate:document.getElementById('eq-rd').value,
+    fuelType:document.getElementById('eq-ft').value,
+    fuelCard:document.getElementById('eq-fc').value,
+    fuelAvg:document.getElementById('eq-fa').value,
+    oilViscosity:document.getElementById('eq-ov').value,
+    oilQty:document.getElementById('eq-oq').value,
+    filterOil:document.getElementById('eq-f1').value,
+    filterGas:document.getElementById('eq-f2').value,
+    filterSep:document.getElementById('eq-f3').value,
+    filterDry:document.getElementById('eq-f4').value,
+    filterAir:document.getElementById('eq-f5').value,
+    filterAC:document.getElementById('eq-f6').value,
+    belt:document.getElementById('eq-bl').value,
+    tireSize:document.getElementById('eq-tr').value,
+    custody:document.getElementById('eq-cu').value,
+    estimatedCost:document.getElementById('eq-co').value,
+    notes:document.getElementById('eq-no').value,
+    addedBy:'admin'
+  };
+  const res=await api(params);
+  btn.textContent='💾 حفظ المعدة';btn.disabled=false;
+  if(res.status==='ok'){
+    const pl=params.char1+params.char2+params.char3+' '+params.num1+params.num2+params.num3+params.num4;
+    addNotif('grn',editId?'تم تعديل معدة':'تمت إضافة معدة جديدة',pl.trim());
+    document.getElementById('addEquipM').dataset.editId='';
+    document.getElementById('aeT').textContent='🚛 إضافة معدة / آلية جديدة';
+    closeM('addEquipM');await loadAll();
+  }else alert('❌ خطأ: '+res.message);
+}
+
+// SELECT MODAL
+function openSM(act){
+  selAct=act;
+  document.getElementById('selT').textContent=act==='edit'?'✏️ اختر المنطقة للتعديل':'🗑️ اختر المنطقة للحذف';
+  document.getElementById('step-r').style.display='block';
+  document.getElementById('step-e').style.display='none';
+  document.getElementById('rls').innerHTML=RGNS.map(r=>`
+    <div class="ri" onclick="selRgn('${r}')">
+      <div class="ric">${RICONS[r]||'📍'}</div><div class="rn">${r}</div>
+    </div>`).join('');
+  openM('selM');
+}
+async function selRgn(r){
+  document.getElementById('rlbl').textContent=r;
+  document.getElementById('step-r').style.display='none';
+  document.getElementById('step-e').style.display='block';
+  const els=document.getElementById('els');
+  els.innerHTML='<div style="text-align:center;padding:20px">⏳...</div>';
+  const data=allE.filter(e=>e['المنطقة']===r);
+  if(!data.length){els.innerHTML='<div style="text-align:center;padding:20px;color:var(--g6)">لا توجد معدات</div>';return;}
+  els.innerHTML=data.map(e=>`
+    <div class="ri" onclick="hEqPick('${e['ID']}','${getPlate(e)}','${e['الماركة']||''}')">
+      <div class="ric">🚛</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:700">${getPlate(e)}</div><div style="font-size:11px;color:var(--g6)">${e['الماركة']||'-'} — ${e['الوظيفة']||'-'}</div></div>
+    </div>`).join('');
+}
+function bkRgn(){document.getElementById('step-r').style.display='block';document.getElementById('step-e').style.display='none';}
+async function hEqPick(id,pl,tp){
+  closeM('selM');
+  if(selAct==='edit'){
+    document.getElementById('aeT').textContent='✏️ تعديل: '+pl+' — '+tp;
+    document.getElementById('addEquipM').dataset.editId=id;
+    openM('addEquipM');
+  }else{
+    if(confirm('تأكيد حذف العربية:\n'+pl+' — '+tp)){
+      const res=await api({action:'deleteEquip',id});
+      if(res.status==='ok'){addNotif('red','تم حذف معدة',pl);await loadAll();}
+      else alert('❌ '+res.message);
+    }
+  }
+}
+
+// USERS
+function showUPerms(role){
+  const sec=document.getElementById('uperms');
+  sec.style.display=role&&role!=='Admin'?'block':'none';
+  const perms=['مشاهدة المعدات','إضافة معدة','تعديل معدة','حذف معدة','إبلاغ عن عطل','تعديل الأعطال','طباعة وتقارير','الإبلاغ من السيارات والمعدات'];
+  const pc=document.getElementById('upermc');
+  if(pc) pc.innerHTML=perms.map(p=>`<div class="cki"><input type="checkbox" id="p-${p}" value="${p}"><label for="p-${p}">${p}</label></div>`).join('');
+}
+function saveUser(){alert('✅ تم حفظ المستخدم');closeM('addUsrM');}
+function blockAll(){if(confirm('تأكيد حظر جميع المستخدمين مؤقتاً؟')) addNotif('red','تم حظر جميع المستخدمين','بواسطة مدير الحملة');}
+
+// DRIVERS
+function saveDriver(){alert('✅ تم حفظ بيانات السائق');closeM('addDrvM');}
+
+// REGIONS
+function saveRegion(){
+  const nm=document.getElementById('newRgn').value.trim();
+  if(!nm){alert('برجاء إدخال اسم المنطقة');return;}
+  RGNS.push(nm);
+  localStorage.setItem('rgns',JSON.stringify(RGNS));
+  fillRgns();
+  closeM('addRgnM');
+  document.getElementById('newRgn').value='';
+  addNotif('bl','تمت إضافة منطقة',nm);
+}
+
+// NOTIFICATIONS
+function addNotif(type,title,msg){
+  notifs.unshift({type,title,msg,time:new Date().toLocaleTimeString('ar'),read:false});
+  const unr=notifs.filter(n=>!n.read).length;
+  const nc=document.getElementById('nc');
+  if(unr>0){nc.textContent=unr;nc.style.display='flex';}
+  renderNotifs();
+}
+function renderNotifs(){
+  const nl=document.getElementById('nl');
+  if(!notifs.length){nl.innerHTML='<div style="text-align:center;padding:30px;color:var(--g6)">لا توجد إشعارات</div>';return;}
+  nl.innerHTML=notifs.map(n=>`
+    <div class="ni ${n.read?'':'unr'} ${n.type}">
+      <h5>${n.title}</h5><p>${n.msg} — ${n.time}</p>
+    </div>`).join('');
+}
+function toggleNP(){
+  const p=document.getElementById('np');p.classList.toggle('open');
+  notifs.forEach(n=>n.read=true);
+  document.getElementById('nc').style.display='none';
+}
+
+// HELP
+const helpTxts={dashboard:'هنا لوحة التحكم — بتشوف فيها كل الإحصائيات والمؤشرات وآخر الأعطال.',vehicles:'صفحة السيارات والمعدات — تقدر تضيف وتعدل وتشوف كل المعدات.',addEquip:'فورم إضافة معدة — ادخل كل البيانات ثم اضغط حفظ.',default:'كيف يمكنني مساعدتك؟'};
+function openHelp(pg){
+  const ap=document.querySelector('.page.active');
+  const apId=ap?ap.id.replace('page-',''):'default';
+  document.getElementById('helpTxt').textContent=helpTxts[pg||apId]||helpTxts.default;
+  openM('helpM');
+}
+
+// OPEN EQUIP
+function openAE(){
+  document.getElementById('addEquipM').dataset.editId='';
+  document.getElementById('aeT').textContent='🚛 إضافة معدة / آلية جديدة';
+  openM('addEquipM');
+}
+
+// MODAL HELPERS
+function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeM(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('click',e=>{document.querySelectorAll('.ov').forEach(o=>{if(e.target===o)closeM(o.id);});});
+function toggleDM(id,e){e.stopPropagation();document.getElementById(id).classList.toggle('open');}
+function sB(e){e.stopPropagation();}
+document.addEventListener('click',()=>document.querySelectorAll('.dm,.umenu').forEach(m=>m.classList.remove('open')));
+function toggleUM(e){e.stopPropagation();document.getElementById('um').classList.toggle('open');}
+function logout(){
+  if(!confirm('تأكيد الخروج؟'))return;
+  document.getElementById('app').style.display='none';
+  const sp=document.getElementById('splash');
+  sp.style.opacity='1';sp.style.pointerEvents='auto';
+  sp.innerHTML=`<div style="text-align:center;color:white"><div style="font-size:50px;margin-bottom:20px">👋</div><h2 style="font-size:22px;font-weight:900;margin-bottom:10px">إلى اللقاء يا ريس</h2><div style="font-size:20px;font-weight:900;letter-spacing:4px;margin-top:20px;text-shadow:0 0 20px rgba(255,255,255,.8)">Nazgul Never Sleeps</div><div style="font-size:11px;opacity:.35;margin-top:30px">Powered By Eng.Ahmed Ezz Oshalla</div></div>`;
+}
+
+// OTHER OPTIONS
+function handleOth(sel,modalId){
+  if(sel.value==='other'){sel.value='';curOthSel=sel;openM(modalId);setTimeout(()=>{const inp=document.querySelector('#'+modalId+' input[type=text]');if(inp)inp.focus();},150);}
+}
+function saveOth(inpId,selId,stKey,modalId){
+  const v=document.getElementById(inpId).value.trim();if(!v)return;
+  const arr=JSON.parse(localStorage.getItem(stKey)||'[]');arr.push(v);localStorage.setItem(stKey,JSON.stringify(arr));
+  const sel=document.getElementById(selId);
+  const o=document.createElement('option');o.value=v;o.textContent=v;
+  const oth=sel.querySelector('option[value="other"]');
+  sel.insertBefore(o,oth);sel.value=v;
+  closeM(modalId);document.getElementById(inpId).value='';
+}
+function saveGenOth(){
+  const v=document.getElementById('othGenI').value.trim();
+  if(!v||!curOthSel)return;
+  const o=document.createElement('option');o.value=v;o.textContent=v;
+  const oth=curOthSel.querySelector('option[value="other"]');
+  curOthSel.insertBefore(o,oth);curOthSel.value=v;
+  closeM('othGenM');document.getElementById('othGenI').value='';
+}
+
+// DRIVERS PAGE - Load from Sheet
+async function loadDrivers(){
+  const el=document.getElementById('drc');
+  const r=document.getElementById('drr').value;
+  el.innerHTML='<div style="text-align:center;padding:20px">⏳ جاري التحميل...</div>';
+  const res=await api({action:'getDrivers',region:r||'all'});
+  if(res.status!=='ok'||!res.data||!res.data.length){
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g6)">لا يوجد سائقون مسجلون بعد</div>';return;
+  }
+  el.innerHTML=`<div style="background:white;border-radius:var(--r);box-shadow:var(--s1);border:1px solid var(--g2);overflow:hidden">
+    <table class="tbl"><thead><tr><th>#</th><th>الاسم</th><th>السن</th><th>درجة الرخصة</th><th>الوظيفة</th><th>المنطقة</th><th>تاريخ التعيين</th></tr></thead>
+    <tbody>${res.data.map((d,i)=>`<tr><td>${i+1}</td><td style="font-weight:700">${d['الاسم']||'-'}</td><td>${d['السن']||'-'}</td><td>${d['درجة الرخصة']||'-'}</td><td>${d['الوظيفة']||'-'}</td><td>${d['المنطقة']||'-'}</td><td>${d['تاريخ التعيين']||'-'}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+// Override saveDriver to actually save
+async function saveDriver(){
+  const nm=document.getElementById('dn').value.trim();
+  if(!nm){alert('برجاء إدخال اسم السائق');return;}
+  const btn=document.querySelector('#addDrvM .bp');
+  btn.textContent='⏳...';btn.disabled=true;
+  const res=await api({
+    action:'addDriver',
+    name:nm,
+    age:document.getElementById('da').value,
+    hireDate:document.getElementById('dh').value,
+    licDegree:document.getElementById('dl2').value,
+    job:document.getElementById('dj').value,
+    region:document.getElementById('drm').value,
+    addedBy:'admin'
+  });
+  btn.textContent='💾 حفظ';btn.disabled=false;
+  if(res.status==='ok'){
+    addNotif('grn','تمت إضافة سائق',nm);
+    closeM('addDrvM');
+    loadDrivers();
+    // Refresh driver selects in equip form
+    loadDriverSelects();
+  }else alert('❌ '+res.message);
+}
+
+// Load drivers into equip form selects
+async function loadDriverSelects(){
+  const res=await api({action:'getDrivers',region:'all'});
+  if(res.status!=='ok'||!res.data) return;
+  ['eq-d1','eq-d2','eq-d3'].forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="">-- اختر --</option>';
+    res.data.forEach(d=>{
+      sel.innerHTML+=`<option value="${d['الاسم']}">${d['الاسم']} — ${d['المنطقة']||''}</option>`;
+    });
+    sel.innerHTML+='<option value="other">أخرون</option>';
+    if(cur) sel.value=cur;
+  });
+}
+
+// REGIONS PAGE
+function loadRegionsPage(){
+  const el=document.getElementById('rgc');
+  el.innerHTML=`<div style="background:white;border-radius:var(--r);box-shadow:var(--s1);border:1px solid var(--g2);overflow:hidden">
+    <table class="tbl"><thead><tr><th>#</th><th>اسم المنطقة</th><th>عدد المعدات</th><th>إجراءات</th></tr></thead>
+    <tbody>${RGNS.map((r,i)=>{
+      const cnt=allE.filter(e=>e['المنطقة']===r).length;
+      return`<tr><td>${i+1}</td><td style="font-weight:700">${r}</td><td>${cnt}</td>
+      <td style="white-space:nowrap">
+        <button class="btn bs bsm" onclick="editRegion(${i},'${r}')">✏️ تعديل</button>
+        <button class="btn bd bsm" onclick="deleteRegion(${i},'${r}')">🗑️ حذف</button>
+      </td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+function editRegion(idx,oldName){
+  const nm=prompt('تعديل اسم المنطقة:',oldName);
+  if(!nm||nm===oldName)return;
+  RGNS[idx]=nm;
+  localStorage.setItem('rgns',JSON.stringify(RGNS));
+  // Update all equip in this region
+  allE.forEach(e=>{if(e['المنطقة']===oldName) e['المنطقة']=nm;});
+  fillRgns();loadRegionsPage();
+  addNotif('bl','تم تعديل اسم المنطقة',`${oldName} ← ${nm}`);
+}
+
+async function deleteRegion(idx,name){
+  if(name==='القطاع'){alert('لا يمكن حذف القطاع');return;}
+  const cnt=allE.filter(e=>e['المنطقة']===name).length;
+  if(!confirm(`تأكيد حذف منطقة: ${name}
+
+سيتم نقل ${cnt} معدة للقطاع`))return;
+  // Move equip to القطاع
+  const movePromises=allE.filter(e=>e['المنطقة']===name).map(e=>api({action:'editEquip',id:e['ID'],region:'القطاع',editedBy:'admin'}));
+  await Promise.all(movePromises);
+  RGNS.splice(idx,1);
+  localStorage.setItem('rgns',JSON.stringify(RGNS));
+  fillRgns();await loadAll();loadRegionsPage();
+  addNotif('red','تم حذف منطقة',name+' — تم نقل المعدات للقطاع');
+}
+
+// USERS PAGE  
+function loadUsersPage(){
+  const el=document.getElementById('uc2');
+  // Demo users for now
+  const users=[
+    {name:'مدير الحملة',username:'Eng.Ahmed_Ezz',role:'Super Admin',region:'القطاع',status:'نشط'},
+  ];
+  el.innerHTML=`<div style="background:white;border-radius:var(--r);box-shadow:var(--s1);border:1px solid var(--g2);overflow:hidden">
+    <table class="tbl"><thead><tr><th>#</th><th>الاسم الحقيقي</th><th>اسم المستخدم</th><th>الصلاحية</th><th>المنطقة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+    <tbody>${users.map((u,i)=>`<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:700">${u.name}</td>
+      <td style="font-size:11px;color:var(--g6)">${u.username}</td>
+      <td><span class="bdg ${u.role==='Super Admin'?'bl':u.role==='Admin'?'ok':'warn'}">${u.role}</span></td>
+      <td>${u.region}</td>
+      <td><span class="bdg ${u.status==='نشط'?'ok':'bad'}">${u.status}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn bs bsm">✏️</button>
+        <button class="btn bd bsm">🚫</button>
+      </td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+// FIX STATS - real time update
+function updAllStats(){
+  updStats();
+  updInds();
+  updDashF();
+  updSBBadges();
+}
+
+
+// PROFILE
+function saveProfile(){
+  const nm=document.getElementById('prof-name').value;
+  document.getElementById('sb-un').textContent=nm;
+  document.getElementById('wm').textContent='مرحباً يا '+nm.split(' ')[0]+' 👋';
+  addNotif('grn','تم حفظ الملف الشخصي','');
+  alert('✅ تم حفظ التعديلات');
+}
+function changeAvatar(inp){
+  if(!inp.files[0]) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const src=e.target.result;
+    document.getElementById('prof-av').innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    document.getElementById('sb-av').innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+
+// ACTIVITY LOG
+const actLog=JSON.parse(localStorage.getItem('actLog')||'[]');
+function logActivity(action){
+  const entry={action,time:new Date().toLocaleString('ar-EG'),user:'Eng.Ahmed_Ezz'};
+  actLog.unshift(entry);
+  if(actLog.length>100) actLog.pop();
+  localStorage.setItem('actLog',JSON.stringify(actLog));
+  const el=document.getElementById('prof-log');
+  if(el) el.innerHTML=actLog.slice(0,10).map(a=>`<div style="padding:8px 0;border-bottom:1px solid var(--g1);font-size:12px;display:flex;justify-content:space-between"><span>${a.action}</span><span style="color:var(--g6)">${a.time}</span></div>`).join('');
+  // Update user log in users page
+  const ul=document.getElementById('ul');
+  if(ul) ul.innerHTML=actLog.slice(0,20).map(a=>`<div style="padding:8px 0;border-bottom:1px solid var(--g1);font-size:12px;display:flex;justify-content:space-between"><span><strong>${a.user}</strong> — ${a.action}</span><span style="color:var(--g6)">${a.time}</span></div>`).join('');
+}
+
+// USERS PAGE - full
+function loadUsersPage(){
+  const el=document.getElementById('uc2');
+  const saved=JSON.parse(localStorage.getItem('users')||'[]');
+  const allUsers=[{name:'مدير الحملة',username:'Eng.Ahmed_Ezz',role:'Super Admin',region:'القطاع كله',status:'نشط',job:'مدير إدارة الحملة الميكانيكية'},...saved];
+  el.innerHTML=`<div style="background:white;border-radius:var(--r);box-shadow:var(--s1);border:1px solid var(--g2);overflow:hidden">
+    <table class="tbl"><thead><tr><th>#</th><th>الاسم الحقيقي</th><th>اسم المستخدم</th><th>الصلاحية</th><th>المنطقة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+    <tbody>${allUsers.map((u,i)=>`<tr>
+      <td>${i+1}</td>
+      <td style="font-weight:700">${u.name}</td>
+      <td style="font-size:11px;color:var(--g6)">${u.username}</td>
+      <td><span class="bdg ${u.role==='Super Admin'?'bl':u.role==='Admin'?'ok':'warn'}">${u.role}</span></td>
+      <td>${u.region}</td>
+      <td><span class="bdg ${u.status==='نشط'?'ok':'bad'}">${u.status}</span></td>
+      <td style="white-space:nowrap">
+        ${u.role!=='Super Admin'?`<button class="btn bs bsm" onclick="editUser(${i})">✏️</button>
+        <button class="btn bd bsm" onclick="blockUser(${i},'${u.username}')">🚫</button>`:'—'}
+      </td>
+    </tr>`).join('')}</tbody></table>
+    <div style="padding:10px 16px;background:var(--g0);border-top:1px solid var(--g2);font-size:12px;font-weight:600;color:var(--g6)">الإجمالي: ${allUsers.length} مستخدم</div>
+  </div>`;
+}
+
+// Override saveUser
+function saveUser(){
+  const nm=document.getElementById('un').value.trim();
+  const uu=document.getElementById('uu').value.trim();
+  const role=document.getElementById('ur').value;
+  if(!nm||!uu||!role){alert('برجاء ملء الحقول المطلوبة');return;}
+  // Get selected regions
+  const selRgns=[...document.querySelectorAll('#urgns input:checked')].map(i=>i.value);
+  const saved=JSON.parse(localStorage.getItem('users')||'[]');
+  const newUser={
+    name:nm,username:uu,role,
+    region:selRgns.length?selRgns.join(', '):'القطاع كله',
+    status:'نشط',job:document.getElementById('uj').value,
+    email:document.getElementById('ue').value,
+    phone:document.getElementById('uph').value
+  };
+  saved.push(newUser);
+  localStorage.setItem('users',JSON.stringify(saved));
+  addNotif('grn','تمت إضافة مستخدم جديد',nm+' — '+role);
+  logActivity('أضاف مستخدم جديد: '+nm);
+  closeM('addUsrM');
+  loadUsersPage();
+  // Clear form
+  ['un','uu','ue','uph','uwa','uj'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ur').value='';
+  document.getElementById('uperms').style.display='none';
+}
+
+function editUser(idx){
+  const saved=JSON.parse(localStorage.getItem('users')||'[]');
+  if(saved[idx-1]){
+    const u=saved[idx-1];
+    alert('تعديل: '+u.name+' — سيتم إضافة شاشة التعديل قريباً');
+  }
+}
+function blockUser(idx,username){
+  if(!confirm('تأكيد حظر المستخدم: '+username+'؟')) return;
+  const saved=JSON.parse(localStorage.getItem('users')||'[]');
+  if(saved[idx-1]) saved[idx-1].status=saved[idx-1].status==='نشط'?'محظور':'نشط';
+  localStorage.setItem('users',JSON.stringify(saved));
+  addNotif('red','تم حظر مستخدم',username);
+  logActivity('حظر مستخدم: '+username);
+  loadUsersPage();
+}
+function blockAll(){
+  if(!confirm('تأكيد حظر جميع المستخدمين مؤقتاً؟')) return;
+  const saved=JSON.parse(localStorage.getItem('users')||'[]');
+  saved.forEach(u=>u.status='محظور');
+  localStorage.setItem('users',JSON.stringify(saved));
+  addNotif('red','تم حظر جميع المستخدمين','بواسطة مدير الحملة');
+  logActivity('حظر جميع المستخدمين');
+  loadUsersPage();
+}
+
+// LOG navigation
+const origGo=go;
+function go(name,el){
+  origGo(name,el);
+  if(name!=='dashboard') logActivity('فتح صفحة: '+(pgTitles[name]||name));
+}
+
+</script>
+</body>
+</html>
